@@ -3,7 +3,6 @@ from __future__ import annotations
 from abc import ABCMeta, abstractmethod
 from enum import IntEnum, StrEnum, auto
 import textwrap
-import textwrap
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -30,11 +29,22 @@ class Ship(metaclass=ABCMeta):
         self.type: ShipType = type
         self.name: str = name
         self.shape: NDArray[np.int_] = shape
+
         self.position: Point| None = None
 
     @abstractmethod
     def get_shapes(self)-> tuple[NDArray[np.int_], ...]:
-        pass
+        raise NotImplementedError
+    
+    def change_orientation(self, orientation: int):
+        if self.shape is None:
+            raise ValueError("Ship shape is not set")
+        
+        if orientation < 0 or orientation >= len(self.get_shapes()):
+            raise ValueError(f"Invalid orientation {orientation} for ship {self.name}")
+        
+        shapes = self.get_shapes()
+        self._shape = shapes[orientation]
 
     def __repr__(self) -> str:
         return textwrap.dedent(f"""
@@ -50,11 +60,11 @@ class Scout(Ship):
 
     def get_shapes(self) -> tuple[NDArray[np.int_], ...]:
         return (self.shape,)
-
+    
 class Destroyer(Ship):
     def __init__(self) -> None:
         super().__init__(ShipType.DESTROYER, "Destroyer", np.array([[CellState.SHIP] * 2]))
-        
+
     def get_shapes(self) -> tuple[NDArray[np.int_], ...]:
         return (self.shape, self.shape.T)
 
@@ -68,6 +78,6 @@ class Cruiser(Ship):
 class Battleship(Ship):
     def __init__(self) -> None:
         super().__init__(ShipType.BATTLESHIP, "Battleship", np.array([[CellState.SHIP] * 4]))
-        
+
     def get_shapes(self) -> tuple[NDArray[np.int_], ...]:
         return (self.shape, self.shape.T)
