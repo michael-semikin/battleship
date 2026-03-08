@@ -1,0 +1,69 @@
+from abc import ABCMeta, abstractmethod
+
+from models.board import Board, Point
+from models.players import Player
+from models.ship import CellState
+
+
+class ViewProvider (metaclass=ABCMeta):
+   @abstractmethod
+   def render(self, player: Player):
+       pass
+   
+class ConsoleViewProvider(ViewProvider):
+    _SYMBOLS = {
+        CellState.EMPTY: "\u2591", # LIGHT SHADE ░ (Ocean)
+        CellState.SHIP:  "\u2588", # FULL BLOCK █ (Deck)
+        CellState.HIT:   "\u2716", # HEAVY MULTIPLICATION X ✖ (Hit)
+        CellState.MISS:  "\u2022", # BULLET • (Miss)
+    }
+    
+    _TOP_LEFT_EDGE, _TOP_RIGHT_EDGE = "\u250c", "\u2510"  # ┌, ┐
+    _BOTTOM_LEFT_EDGE, _BOTTOM_RIGHT_EDGE = "\u2514", "\u2518"  # └, ┘
+
+    _HORIZONTAL_LINE, _VERTICAL_LINE   = "\u2500", "\u2502"  # ─, │
+
+    def render(self, player: Player):
+        size = Board.BOX_SIZE
+        
+        # Вспомогательная функция для сборки одной строки любой доски
+        def get_row_content(board_to_render: Board, row_idx: int, hide_ships: bool) -> str:
+            cells_view = ""
+            for col_idx in range(size):
+                state = board_to_render[Point(row_idx, col_idx)]
+                # Fog of War: если hide_ships=True, заменяем SHIP на EMPTY
+                visible_state = state if not (hide_ships and state == CellState.SHIP) else CellState.EMPTY
+                
+                if visible_state == CellState.MISS:
+                    cells_view += f" {self._SYMBOLS[visible_state]}"
+                else:
+                    cells_view += self._SYMBOLS[visible_state] * 2
+            return f"{row_idx:2} {self._VERTICAL_LINE}{cells_view}{self._VERTICAL_LINE}"
+
+        # header with column letters
+        letters_row = " ".join([chr(97 + i) for i in range(size)])
+
+        print(f"\n{' ' * 7}[ {player.name.upper()} ]{' ' * 22}[ ENEMY BOARD ]")
+        print(f"{' ' * 5}{letters_row}{' ' * 17}{letters_row}")
+
+        # top frame for both boards
+        h_line = self._HORIZONTAL_LINE * (size * 2)
+        edge_line = f"   {self._TOP_LEFT_EDGE}{h_line}{self._TOP_RIGHT_EDGE}"
+
+        print(f"{edge_line}           {edge_line}")
+
+        # board rows
+        for r in range(size):
+            own_line = get_row_content(player.board, r, hide_ships=False)
+            radar_line = get_row_content(player.tracking_board, r, hide_ships=True)
+            
+            # Печать с 11 пробелами между вертикальными линиями
+            print(f"{own_line}           {radar_line}")
+
+        # bottom frame for both boards
+        bottom_edge = f"   {self._BOTTOM_LEFT_EDGE}{h_line}{self._BOTTOM_RIGHT_EDGE}"
+        print(f"{bottom_edge}           {bottom_edge}")
+
+
+
+
