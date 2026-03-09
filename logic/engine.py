@@ -1,17 +1,24 @@
 import random
 
+from logic.turn_controller import TurnController
 from models.board import Board, Point
 from models.players import Player
-from models.ship import Battleship, CellState, Cruiser, Destroyer, Scout
+from models.ship import Battleship, Cruiser, Destroyer, Scout
+
+from models.turn import Action
+from view.input_provider import ConsoleInputProvider, RandomInputProvider
 from view.view_provider import ViewProvider
 
 class GameEngine:
     MAX_SHIP_PLACEMENT_ATTEMPTS = 100
 
     def __init__(self, view_provider: ViewProvider) -> None:
-        self.players = (Player("Player One"), Player("Player Two"))
+        self.players = (
+            Player("Player One", ConsoleInputProvider()), 
+            Player("Player Two", RandomInputProvider())
+            )
         self.view_provider = view_provider
-
+        
     def init_game(self):
         """ initializes the game by creating two players and filling their boards with ships
         """
@@ -53,25 +60,25 @@ class GameEngine:
         """ main loop
         """
 
-        # TODO: display all the users boards
-        self.players[0].update_tracking_board(Point(1,1), CellState.MISS)
-        self.players[0].update_tracking_board(Point(1,3), CellState.HIT)
-        self.view_provider.render(self.players[0])
+        turn_controller = TurnController(*self.players)
+        print(self.players[1].board.matrix)
 
-        #print(self.players[0].board.matrix)
-
-
-        while(False):
+        is_over = False
+        while(not is_over):
             # ViewProvider.invalidate views
-            # TODO: get user input for target cell
-            #   validate input
-            #   convert to Point
+            self.view_provider.invalidate()
+            self.view_provider.render(self.players[0])
 
-            # TODO: Implement TurnController
-            #   player 1 turn
-            #   inform player 2
-            #   if hit
-            #     mark tracking board 
-            #     loop
+            # get user input for target cell
+            player_input = turn_controller.current_player.get_input()
+            if player_input.action == Action.QUIT:
+                is_over = True
 
-            pass
+            # Implement TurnController
+            turn_controller.make_turn(player_input.point)
+
+            player_one_defeated = self.players[0].board.no_ships_remaining
+            player_two_defeated = self.players[1].board.no_ships_remaining
+            is_over = player_one_defeated or player_two_defeated            
+
+            

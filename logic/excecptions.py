@@ -3,3 +3,6 @@ class ShipAllocationError(Exception):
 
 class AlreadyHitError(Exception):
     """Raised when a cell that has already been hit is targeted again."""
+
+class InputError(Exception):
+    """Raised when a player provides invalid input"""

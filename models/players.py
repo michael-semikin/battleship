@@ -1,13 +1,16 @@
 # Player management for the Battleship game 
-from models.board import Board
+from models.board import Board, Point
 from models.ship import CellState
+from models.turn import Turn
+from view.input_provider import InputProvider
 
 
 class Player:
-    def __init__(self, name: str):
+    def __init__(self, name: str, input_provider: InputProvider):
         self.name: str = name
         self._main_board: Board = Board()
         self._tracking_board: Board = Board()
+        self.input_provider = input_provider
 
     @property
     def tracking_board(self) -> Board:
@@ -16,6 +19,9 @@ class Player:
     @property
     def board(self) -> Board:
         return self._main_board
+    
+    def get_input(self) -> Turn:
+        return self.input_provider.get_input()
     
     def set_board(self, value: Board):
         self._main_board = value
@@ -28,4 +34,4 @@ class Player:
         """
  
         self._tracking_board.matrix[point.row, point.column] = result
-     
+    

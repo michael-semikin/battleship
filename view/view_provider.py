@@ -10,12 +10,16 @@ class ViewProvider (metaclass=ABCMeta):
    def render(self, player: Player):
        pass
    
+   @abstractmethod
+   def invalidate(self):
+       """contains some logic to refresh screen and /or update rendering"""
+   
 class ConsoleViewProvider(ViewProvider):
     _SYMBOLS = {
-        CellState.EMPTY: "\u2591", # LIGHT SHADE ░ (Ocean)
-        CellState.SHIP:  "\u2588", # FULL BLOCK █ (Deck)
-        CellState.HIT:   "\u2716", # HEAVY MULTIPLICATION X ✖ (Hit)
-        CellState.MISS:  "\u2022", # BULLET • (Miss)
+        CellState.EMPTY: "░",
+        CellState.SHIP:  "█", 
+        CellState.HIT:   "╳", 
+        CellState.MISS:  "*"
     }
     
     _TOP_LEFT_EDGE, _TOP_RIGHT_EDGE = "\u250c", "\u2510"  # ┌, ┐
@@ -33,11 +37,8 @@ class ConsoleViewProvider(ViewProvider):
                 state = board_to_render[Point(row_idx, col_idx)]
                 # Fog of War: если hide_ships=True, заменяем SHIP на EMPTY
                 visible_state = state if not (hide_ships and state == CellState.SHIP) else CellState.EMPTY
-                
-                if visible_state == CellState.MISS:
-                    cells_view += f" {self._SYMBOLS[visible_state]}"
-                else:
-                    cells_view += self._SYMBOLS[visible_state] * 2
+                cells_view += self._SYMBOLS[visible_state] * 2
+
             return f"{row_idx:2} {self._VERTICAL_LINE}{cells_view}{self._VERTICAL_LINE}"
 
         # header with column letters
@@ -64,6 +65,7 @@ class ConsoleViewProvider(ViewProvider):
         bottom_edge = f"   {self._BOTTOM_LEFT_EDGE}{h_line}{self._BOTTOM_RIGHT_EDGE}"
         print(f"{bottom_edge}           {bottom_edge}")
 
-
-
-
+    def invalidate(self):
+        super().invalidate()
+        print("\033c", end="")
+        

@@ -28,7 +28,7 @@ class FireVisitor(Visitor):
     def visit_board(self, board: Board, point: Point) -> CellState:
         hit_cell = board.matrix[*point]
         
-        if hit_cell in {CellState.HIT, hit_cell == CellState.MISS}:
+        if hit_cell in {CellState.HIT, CellState.MISS}:
             raise AlreadyHitError(f"Cell at {point} has already been targeted")
 
         if hit_cell == CellState.SHIP:

@@ -8,6 +8,10 @@ class TurnController:
         self.players = {0: player_one, 1: player_two}
         self.current_player_index = 0
 
+    @property
+    def current_player(self) -> Player:
+        return self.players[self.current_player_index]
+
     def make_turn(self, point):
         current_player = self.players[self.current_player_index]
         opponent_player = self.players[1 - self.current_player_index]

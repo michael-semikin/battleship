@@ -96,6 +96,7 @@ class Board(Acceptor):
         
         return None
     
+    @property
     def no_ships_remaining(self) -> bool:
         return all(not ship.is_alive() for ship in self.ships)
 
