@@ -7,4 +7,5 @@ def main():
     game.init_game()
     game.play()
 
-main()    
+if __name__ == "__main__":
+    main()

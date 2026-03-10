@@ -1,4 +1,4 @@
-from src.exceptions.excecptions import InputError
+from src.exceptions.input_error import InputError
 from src.models.board import Point
 from src.models.turn import Action, Turn
 from src.view.input_provider import InputProvider

@@ -12,7 +12,7 @@ from src.models.ship import CellState
 
 if TYPE_CHECKING:
     from src.models.ship import Ship
-    from src.exceptions.excecptions import ShipAllocationError
+    from src.exceptions.ship_allocation_error import ShipAllocationError
 
 
 
