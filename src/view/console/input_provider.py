@@ -1,15 +1,8 @@
-from abc import ABC, abstractmethod
-import random
+from src.exceptions.excecptions import InputError
+from src.models.board import Point
+from src.models.turn import Action, Turn
+from src.view.input_provider import InputProvider
 
-from logic.excecptions import InputError
-from models.board import Point
-from models.turn import Action, Turn
-
-
-class InputProvider(ABC):
-    @abstractmethod
-    def get_input(self) -> Turn:
-        pass
 
 class ConsoleInputProvider(InputProvider):
     def get_input(self) -> Turn:
@@ -18,7 +11,6 @@ class ConsoleInputProvider(InputProvider):
         except (EOFError, KeyboardInterrupt):
             return Turn(Action.QUIT)
 
-        # Выход
         if user_input in ('q', 'quit', 'exit'):
             return Turn(Action.QUIT)
         
@@ -37,7 +29,3 @@ class ConsoleInputProvider(InputProvider):
         
         return Turn(Action.SHOT, Point(row, column))             
     
-class RandomInputProvider(InputProvider):
-    def get_input(self) -> Turn:
-        random.seed()
-        return Turn(Action.SHOT, Point(random.randrange(0, 9), random.randrange(0, 9)))     

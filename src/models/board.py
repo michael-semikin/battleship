@@ -6,13 +6,14 @@ from typing import TYPE_CHECKING
 import numpy as np
 from numpy.typing import NDArray
 
-from logic.acceptor import Acceptor
-from logic.excecptions import ShipAllocationError
-from logic.fire import Visitor
-from models.ship import CellState
+from src.logic.fire import Visitor
+from src.logic.acceptor import Acceptor
+from src.models.ship import CellState
 
 if TYPE_CHECKING:
-    from models.ship import Ship
+    from src.models.ship import Ship
+    from src.exceptions.excecptions import ShipAllocationError
+
 
 
 @dataclass(frozen=True)
@@ -29,6 +30,9 @@ class Point:
 
     def __iter__(self):
         return iter((self.row, self.column))
+    
+    def __str__(self) -> str:
+        return f"{chr(ord('a') + self.column)}{self.row}"
 
 """ Board management for the Battleship game
     The board is represented as a 2D numpy array of integers, where each integer represents the state of the cell (empty, ship, hit, miss).
@@ -40,7 +44,7 @@ class Board(Acceptor):
 
     def __init__(self) -> None:
         self.matrix: NDArray[np.int_] = np.zeros((10, 10), dtype=int)
-        self.ships: list[Ship] = []
+        self._ships: list[Ship] = []
 
     
     def __getitem__(self, point: Point) -> CellState:
@@ -57,7 +61,7 @@ class Board(Acceptor):
             for col_idx in range(ship.shape.shape[1]):
                 self.matrix[position.row + row_idx, position.column + col_idx] = ship.shape[row_idx, col_idx]
 
-        self.ships.append(ship)
+        self._ships.append(ship)
         ship.position = position
 
     def can_add_ship(self, ship: Ship, position: Point) -> bool:
@@ -84,7 +88,7 @@ class Board(Acceptor):
         Returns:
             Ship | None: the ship at the given point, or None if there is no ship at that point"""
     def get_ship_at(self, point: Point) -> Ship | None:
-        for ship in self.ships:
+        for ship in self._ships:
             if ship.position is None:
                 raise ShipAllocationError(f"Ship {ship.name} has no position allocated")
 
@@ -97,8 +101,12 @@ class Board(Acceptor):
         return None
     
     @property
+    def ships(self) -> list[Ship]:
+        return self._ships
+
+    @property
     def no_ships_remaining(self) -> bool:
-        return all(not ship.is_alive() for ship in self.ships)
+        return all(not ship.is_alive for ship in self._ships)
 
     """ Accepts a visitor to perform an action on the board, such as firing at a specific point.
         Args:

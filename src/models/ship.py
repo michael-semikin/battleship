@@ -8,11 +8,11 @@ from typing import TYPE_CHECKING
 import numpy as np
 from numpy.typing import NDArray
 
-from logic.acceptor import Acceptor
+from src.logic.acceptor import Acceptor
 
 if TYPE_CHECKING:
-    from models.board import Point
-    from logic.fire import Visitor
+    from src.models.board import Point
+    from src.logic import Visitor
 
 
 class CellState(IntEnum):
@@ -27,12 +27,16 @@ class ShipType(StrEnum):
     CRUISER = auto()
     BATTLESHIP = auto()
 
+    @property
+    def description(self): 
+        return self.capitalize()
+
 class Ship(Acceptor, metaclass=ABCMeta):
     def __init__(self, type: ShipType, name: str, shape: NDArray[np.int_]) -> None:
         self.type: ShipType = type
         self.name: str = name
         self.shape: NDArray[np.int_] = shape
-
+        
         self.position: Point| None = None
         self.hit_points: int = 0
 
@@ -50,6 +54,7 @@ class Ship(Acceptor, metaclass=ABCMeta):
         shapes = self.get_shapes()
         self.shape = shapes[orientation]
 
+    @property
     def is_alive(self) -> bool:
         return self.hit_points > 0
     

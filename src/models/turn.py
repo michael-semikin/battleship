@@ -1,6 +1,6 @@
 from enum import StrEnum, auto
 
-from models.board import Point
+from src.models.board import Point
 
 
 class Action(StrEnum):

@@ -3,13 +3,13 @@ from __future__ import annotations
 from abc import ABCMeta, abstractmethod
 from typing import TYPE_CHECKING
 
-from logic.excecptions import AlreadyHitError
-from models.ship import CellState
+from src.exceptions.already_hit_error import AlreadyHitError
+from src.models.ship import CellState
 
 if TYPE_CHECKING:
-    from models.board import Board
-    from models.board import Point
-    from models.ship import Ship
+    from src.models.board import Board
+    from src.models.board import Point
+    from src.models.ship import Ship
 
 class Visitor(metaclass=ABCMeta):
 
@@ -29,7 +29,7 @@ class FireVisitor(Visitor):
         hit_cell = board.matrix[*point]
         
         if hit_cell in {CellState.HIT, CellState.MISS}:
-            raise AlreadyHitError(f"Cell at {point} has already been targeted")
+            raise AlreadyHitError(point)
 
         if hit_cell == CellState.SHIP:
             target = board.get_ship_at(point)

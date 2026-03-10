@@ -1,7 +1,17 @@
-from logic.fire import FireVisitor
-from models.players import Player
-from models.ship import CellState
+from dataclasses import dataclass
 
+from src.logic.fire import FireVisitor
+from src.models.players import Player
+from src.models.ship import CellState
+from src.models.turn import Action, Turn
+
+
+@dataclass(frozen=True)
+class TurnResult:
+    player: Player
+    turn: Turn
+    result: CellState
+    
 
 class TurnController:
     def __init__(self, player_one: Player, player_two: Player) -> None:
@@ -12,7 +22,7 @@ class TurnController:
     def current_player(self) -> Player:
         return self.players[self.current_player_index]
 
-    def make_turn(self, point):
+    def make_turn(self, point) -> TurnResult:
         current_player = self.players[self.current_player_index]
         opponent_player = self.players[1 - self.current_player_index]
 
@@ -26,5 +36,6 @@ class TurnController:
         if result == CellState.MISS:
             self.current_player_index = 1 - self.current_player_index
 
+        return TurnResult(current_player, Turn(Action.SHOT, point), result)
 
      
