@@ -1,5 +1,5 @@
 from src.logic.engine import GameEngine
-from src.view.console.view_provider import ConsoleViewProvider
+from src.view.output_providers.console_view_provider import ConsoleViewProvider
 
 
 def main():

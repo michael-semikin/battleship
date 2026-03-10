@@ -8,15 +8,15 @@ from src.models.turn import Turn
 @dataclass(frozen=True)
 class LogEntry:
     message: str
-    turn: Turn
     date: datetime
+    turn: Turn | None = None
 
 class GameLogger:
     def __init__(self, maxsize = 15) -> None:
         self._logs = deque(maxlen=maxsize)
 
-    def log(self, msg: str, turn: Turn):
-        self._logs.append(LogEntry(msg, turn, datetime.now()))
+    def log(self, msg: str, turn: Turn | None = None):
+        self._logs.append(LogEntry(msg, datetime.now(), turn))
 
     def get_logs(self)-> list[LogEntry]:
         return list(self._logs)

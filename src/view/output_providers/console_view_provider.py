@@ -1,8 +1,10 @@
    
+from typing import Iterable
+
 from src.models.board import Board, Point
-from src.models.players import Player
+from src.models.player import Player
 from src.models.ship import CellState, ShipType
-from src.view.view_provider import ViewProvider
+from src.view.output_providers.view_provider import ViewProvider
 
 
 class ConsoleViewProvider(ViewProvider):
@@ -22,16 +24,19 @@ class ConsoleViewProvider(ViewProvider):
         size = Board.BOX_SIZE
         
         # Вспомогательная функция для сборки одной строки любой доски
-        def get_row_content(board_to_render: Board, row_idx: int, hide_ships: bool) -> str:
+        def get_row_content(board_to_render: Board, row_idx: int) -> str:
             cells_view = ""
             for col_idx in range(size):
                 state = board_to_render[Point(row_idx, col_idx)]
-                # Fog of War: если hide_ships=True, заменяем SHIP на EMPTY
-                visible_state = state if not (hide_ships and state == CellState.SHIP) else CellState.EMPTY
-                if visible_state in (CellState.HIT, CellState.MISS):
-                    cells_view += self._SYMBOLS[visible_state]
-                else:
-                    cells_view += self._SYMBOLS[visible_state] * 2
+                match state:
+                    case CellState.HIT | CellState.MISS:
+                        cells_view += f"\033[44m{self._SYMBOLS[state]}\033[0m"
+                    case CellState.SHIP:
+                        cells_view += f"\033[91m{self._SYMBOLS[state] * 2}\033[0m"
+                    case CellState.EMPTY:
+                        cells_view += f"\033[44m{self._SYMBOLS[state] * 2}\033[0m"
+                    case _ :
+                        raise ValueError(f"No case for {state} value")
 
             return f"{row_idx:2} {self._VERTICAL_LINE}{cells_view}{self._VERTICAL_LINE}"
 
@@ -48,9 +53,9 @@ class ConsoleViewProvider(ViewProvider):
         print(f"{edge_line}           {edge_line}")
 
         # board rows
-        for r in range(size):
-            own_line = get_row_content(player.board, r, hide_ships=False)
-            radar_line = get_row_content(player.tracking_board, r, hide_ships=True)
+        for row_idx in range(size):
+            own_line = get_row_content(player.board, row_idx)
+            radar_line = get_row_content(player.tracking_board, row_idx)
             
             # Печать с 11 пробелами между вертикальными линиями
             print(f"{own_line}           {radar_line}")
@@ -69,7 +74,9 @@ class ConsoleViewProvider(ViewProvider):
 
         self.print_at(0, Board.BOX_SIZE + 5)
 
-
+    def render_log(self, log: Iterable[str]):
+        for log_entry in log:
+            print(log_entry)
 
 
     def clear_screen(self):

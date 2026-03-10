@@ -12,7 +12,7 @@ from src.logic.acceptor import Acceptor
 
 if TYPE_CHECKING:
     from src.models.board import Point
-    from src.logic import Visitor
+    from src.logic.fire import Visitor
 
 
 class CellState(IntEnum):

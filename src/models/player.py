@@ -1,8 +1,8 @@
-# Player management for the Battleship game 
 from src.models.board import Board
 from src.models.ship import CellState
 from src.models.turn import Turn
-from src.view.input_provider import InputProvider
+from src.models.turn_result import TurnResult
+from src.view.input_providers.input_provider import InputProvider
 
 
 class Player:
@@ -22,6 +22,9 @@ class Player:
     
     def get_input(self) -> Turn:
         return self._input_provider.get_input()
+    
+    def take_turn_result(self, turn_result: TurnResult):
+        self._input_provider.notify_result(turn_result)
     
     def set_board(self, value: Board):
         self._main_board = value

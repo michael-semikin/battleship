@@ -1,24 +1,28 @@
 from collections import Counter
+from collections.abc import Iterable
 import random
+from typing import cast
 
+from src.exceptions.input_error import InputError
 from src.logic.logger import GameLogger
 from src.exceptions.already_hit_error import AlreadyHitError
-from src.logic.turn_controller import TurnController
-from src.models.board import Board, Point
-from src.models.players import Player
-from src.models.ship import Battleship, Cruiser, Destroyer, Scout, ShipType
+from src.logic.turn_controller import TurnController, TurnResult
 
+from src.models.board import Board, Point
+from src.models.player import Player
+from src.models.ship import Battleship, Cruiser, Destroyer, Scout, ShipType
 from src.models.turn import Action
-from src.view.console.input_provider import ConsoleInputProvider
-from src.view.input_provider import RandomInputProvider
-from src.view.view_provider import ViewProvider
+
+from src.view.input_providers.console_input_provider import ConsoleInputProvider
+from src.view.input_providers.hunter_input_provider import HunterInputProvider
+from src.view.output_providers.view_provider import ViewProvider
 
 class GameEngine:
     MAX_SHIP_PLACEMENT_ATTEMPTS = 100
 
     def __init__(self, view_provider: ViewProvider) -> None:
         self._player_one = Player("Player One", ConsoleInputProvider())
-        self._player_two = Player("Player Two", RandomInputProvider())
+        self._player_two = Player("Player Two", HunterInputProvider())
         
         self._view_provider = view_provider
         self._logger = GameLogger()
@@ -60,12 +64,20 @@ class GameEngine:
                 
         return board
 
-    def _show_log(self):
-        for entry in self._logger.get_logs():
-            print(f"{entry.date}: {entry.message} : shot at {entry.turn.point}")
+    def _get_log(self)-> Iterable[str]:
+        return tuple(f"{entry.date}: {entry.message} : {'shot at' if entry.turn else ' '} {entry.turn.point if entry.turn else ''}" 
+                     for entry in self._logger.get_logs())
        
     def _get_ships_count(self, player: Player) -> Counter:
         return Counter((ship.type, ship.is_alive) for ship in player.board.ships)
+    
+    def _show_stats(self):
+        player_one_ships = self._get_ships_count(self._player_one)
+        player_two_ships = self._get_ships_count(self._player_two)
+        ships_count = tuple(
+                (player_one_ships[ship_type, True], player_two_ships[ship_type, False]) for ship_type in ShipType
+                )
+        self._view_provider.render_stats(ships_count)    
     
     def play(self):
         """ main loop
@@ -81,29 +93,35 @@ class GameEngine:
             self._view_provider.render(self._player_one)
 
             # create stat
-            player_one_ships = self._get_ships_count(self._player_one)
-            player_two_ships = self._get_ships_count(self._player_two)
-            ships_count = tuple((player_one_ships[ship_type, True], player_two_ships[ship_type, False]) for ship_type in ShipType)
-            self._view_provider.render_stats(ships_count)
-
-            self._show_log()
+            self._show_stats()
+            self._view_provider.render_log(self._get_log())
 
             # get user input for target cell
-            player_input = turn_controller.current_player.get_input()
+            try:
+                player_input = turn_controller.current_player.get_input()
+            except InputError as err:
+                self._logger.log(f"{turn_controller.current_player.name} Invalid input: {err}")
+                continue
+
             if player_input.action == Action.QUIT:
-                print(f"Game stopped by {turn_controller.current_player.name}")
+                self._logger.log(f"Game stopped by {turn_controller.current_player.name}")
+                self._view_provider.render_log(self._get_log())
                 break
 
             try:
                 result = turn_controller.make_turn(player_input.point)
             except AlreadyHitError as err:
-                self._logger.log(f"{result.player.name} Oops already hit at {err.point}", player_input)
+                self._logger.log(f"{result.player.name} Oops already hit at {err.point}")
+
+            self._logger.log(f"{turn_count}| {result.player.name} {result.result.name}", player_input)
+            turn_count += 1                
 
             player_one_defeated = self._player_one.board.no_ships_remaining
             player_two_defeated = self._player_two.board.no_ships_remaining
             is_over = player_one_defeated or player_two_defeated
-
-            self._logger.log(f"{turn_count}| {result.player.name} {result.result.name}", player_input)
-            turn_count += 1
         else:
-            print()
+            # it is guaranteed that get_latest_turn() will return a TurnResult, because the game can only end after a turn is made
+            winner = cast(TurnResult, turn_controller.get_latest_turn()).player.name
+
+            self._logger.log(f"Game over! {winner} wins!")
+            self._view_provider.render_log(self._get_log())
