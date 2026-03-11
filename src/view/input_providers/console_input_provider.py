@@ -1,7 +1,8 @@
 from src.exceptions.input_error import InputError
-from src.models import Point, Turn, TurnResult
+from src.models.board import Point
 from src.models.common import BOARD_SIZE
-from src.models.turn import Action
+from src.models.turn import Action, Turn
+from src.models.turn_result import TurnResult
 from src.view.input_providers.input_provider import InputProvider
 
 

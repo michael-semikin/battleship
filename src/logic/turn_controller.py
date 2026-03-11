@@ -9,16 +9,17 @@ class TurnController:
     def __init__(self, player_one: Player, player_two: Player) -> None:
         self._players = {0: player_one, 1: player_two}
         self._current_player_index = 0
-        self._latest_turn: TurnResult | None = None
+        self._who_made_turn: Player | None = None
 
     @property
-    def current_player(self) -> Player:
+    def who_makes_turn(self) -> Player:
         return self._players[self._current_player_index]
     
-    def get_latest_turn(self) -> TurnResult:
-        if self._latest_turn is None:
-            raise ValueError("No turns have been made yet")
-        return self._latest_turn
+    @property
+    def who_made_turn(self) -> Player:
+        if self._who_made_turn is None:
+            raise ValueError("No one has made turn yet")
+        return self._who_made_turn
 
     def make_turn(self, point) -> TurnResult:
         current_player = self._players[self._current_player_index]
@@ -34,11 +35,13 @@ class TurnController:
         if result == CellState.MISS:
             self._current_player_index = 1 - self._current_player_index
 
-        self._latest_turn = TurnResult(current_player, Turn(Action.SHOT, point),  opponent_player.board.get_ship_at(point), result)
+        latest_turn = TurnResult(Turn(Action.SHOT, point),  opponent_player.board.get_ship_at(point), result)
 
         # provide feedback to the player about the result of their turn
-        current_player.take_turn_result(self._latest_turn)
+        current_player.take_turn_result(latest_turn)
 
-        return self._latest_turn
+        self._who_made_turn = current_player
+
+        return latest_turn
 
      

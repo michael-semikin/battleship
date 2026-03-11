@@ -2,13 +2,16 @@ import random
 from collections import deque
 
 from src.logic.turn_controller import TurnResult
-from src.models import Board, Point, Action, Turn
+from src.models.board import Board, Point
+from src.models.common import Action
+from src.models.turn import Turn
 from src.view.input_providers.input_provider import InputProvider
+
 
 class HunterInputProvider(InputProvider):
     def __init__(self):
         self.shots_fired: set[Point] = set()
-        self.hunt_queue: deque[Point] = deque()  # Очередь для добивания
+        self.hunt_queue: deque[Point] = deque()
     
     def get_input(self) -> Turn:
         if self.hunt_queue:

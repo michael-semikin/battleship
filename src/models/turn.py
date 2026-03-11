@@ -1,17 +1,14 @@
 from __future__ import annotations
 
-from enum import StrEnum, auto
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
+
+from src.models.common import Action
 
 if TYPE_CHECKING:
     from src.models.board import Point
 
-
-class Action(StrEnum):
-    QUIT = auto()
-    SHOT = auto()
-
+@dataclass(frozen=True)
 class Turn:
-    def __init__(self, action: Action | None, point: Point | None = None) -> None:
-        self.action: Action | None = action
-        self.point: Point | None = point
+    action: Action | None
+    point: Point | None = None

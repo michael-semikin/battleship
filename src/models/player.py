@@ -1,12 +1,8 @@
-from __future__ import annotations
-
-from typing import TYPE_CHECKING
-
-from src.models import Board
+from src.models.board import Board
+from src.models.common import CellState
+from src.models.turn import Turn
+from src.models.turn_result import TurnResult
 from src.view.input_providers.input_provider import InputProvider
-
-if TYPE_CHECKING:
-    from src.models import CellState, Turn, TurnResult
 
 
 class Player:

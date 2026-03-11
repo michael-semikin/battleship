@@ -1,22 +1,22 @@
+import random
 from collections import Counter
 from collections.abc import Iterable
-import random
 from typing import cast
 
+from src.exceptions.already_hit_error import AlreadyHitError
 from src.exceptions.input_error import InputError
 from src.logic.logger import GameLogger
-from src.exceptions.already_hit_error import AlreadyHitError
-from src.logic.turn_controller import TurnController, TurnResult
-
-from src.models import Board, Player, Point
-
+from src.logic.turn_controller import TurnController
+from src.models.board import Board, Point
 from src.models.common import BOARD_SIZE
+from src.models.player import Player
 from src.models.ship import Battleship, Cruiser, Destroyer, Scout, ShipType
 from src.models.turn import Action
-
-from src.view.input_providers.console_input_provider import ConsoleInputProvider
+from src.view.input_providers.console_input_provider import \
+    ConsoleInputProvider
 from src.view.input_providers.hunter_input_provider import HunterInputProvider
 from src.view.output_providers.view_provider import ViewProvider
+
 
 class GameEngine:
     MAX_SHIP_PLACEMENT_ATTEMPTS = 100
@@ -102,30 +102,29 @@ class GameEngine:
 
             # get user input for target cell
             try:
-                player_input = turn_controller.current_player.get_input()
+                player_input = turn_controller.who_makes_turn.get_input()
             except InputError as err:
-                self._logger.log(f"{turn_controller.current_player.name} Invalid input: {err}")
+                self._logger.log(f"{turn_controller.who_makes_turn.name} Invalid input: {err}")
                 continue
 
             if player_input.action == Action.QUIT:
-                self._logger.log(f"Game stopped by {turn_controller.current_player.name}")
+                self._logger.log(f"Game stopped by {turn_controller.who_makes_turn.name}")
                 is_over = True
                 continue
 
             try:
                 result = turn_controller.make_turn(player_input.point)
             except AlreadyHitError as err:
-                self._logger.log(f"{result.player.name} Oops already hit at {err.point}")
+                self._logger.log(f"{turn_controller.who_made_turn.name} Oops already hit at {err.point}")
 
-            self._logger.log(f"{turn_count}| {result.player.name} {result.result.name}", player_input)
+            self._logger.log(f"{turn_count}| {turn_controller.who_made_turn.name} {result.result.name}", player_input)
             turn_count += 1                
 
             player_one_defeated = self._player_one.board.no_ships_remaining
             player_two_defeated = self._player_two.board.no_ships_remaining
             if player_one_defeated or player_two_defeated:
-                # it is guaranteed that get_latest_turn() will return a TurnResult, because the game can only end after a turn is made
-                winner = cast(TurnResult, turn_controller.get_latest_turn()).player.name
-                self._logger.log(f"Game over! {winner} wins!")
+                # it is guaranteed that who_made_turn() will return a player, because the game can only end after a turn is made
+                self._logger.log(f"Game won by {turn_controller.who_made_turn.name}")
                 is_over = True                
 
 

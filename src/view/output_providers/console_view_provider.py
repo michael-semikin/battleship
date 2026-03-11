@@ -1,8 +1,9 @@
    
 from typing import Iterable
 
-from src.models import CellState, Board, Player, Point, ShipType
-from src.models.common import BOARD_SIZE
+from src.models.board import Board, Point
+from src.models.common import BOARD_SIZE, CellState, ShipType
+from src.models.player import Player
 from src.view.output_providers.view_provider import ViewProvider
 
 
