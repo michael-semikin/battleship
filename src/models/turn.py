@@ -1,6 +1,11 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from enum import StrEnum, auto
 
-from src.models.board import Point
+if TYPE_CHECKING:
+    from src.models.board import Point
 
 
 class Action(StrEnum):

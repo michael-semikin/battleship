@@ -1,3 +1,7 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from collections import Counter
 from collections.abc import Iterable
 import random
@@ -8,8 +12,8 @@ from src.logic.logger import GameLogger
 from src.exceptions.already_hit_error import AlreadyHitError
 from src.logic.turn_controller import TurnController, TurnResult
 
-from src.models.board import Board, Point
-from src.models.player import Player
+from src.models import Board, Player, Point
+
 from src.models.ship import Battleship, Cruiser, Destroyer, Scout, ShipType
 from src.models.turn import Action
 

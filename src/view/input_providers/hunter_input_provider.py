@@ -36,7 +36,7 @@ class HunterInputProvider(InputProvider):
                 if neighbor not in self.shots_fired:
                     self.hunt_queue.append(neighbor)
         else:
-            for neighbor in Board.get_ship_surrounding(turn_result.ship):
+            for neighbor in Board.get_surroundings(turn_result.turn.point):
                 self.shots_fired.add(neighbor)            
             self.hunt_queue.clear()
     

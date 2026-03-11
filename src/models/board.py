@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -8,38 +7,12 @@ from numpy.typing import NDArray
 
 from src.logic.fire import Visitor
 from src.logic.acceptor import Acceptor
-from src.models.ship import CellState
+from src.models.cell_state import CellState
 
 if TYPE_CHECKING:
-    from src.models.ship import Ship
+    from src.models import Point, Ship
     from src.exceptions.ship_allocation_error import ShipAllocationError
-
-@dataclass(frozen=True)
-class Point:
-    row: int
-    column: int
-
-    def __post_init__(self):
-        if self.row < 0 or self.row >= Board.BOX_SIZE:
-            raise ValueError(f"Row must be between 0 and {Board.BOX_SIZE - 1}")
-        
-        if self.column < 0 or self.column >= Board.BOX_SIZE:
-            raise ValueError(f"Column must be between 0 and {Board.BOX_SIZE - 1}")
-
-    def __iter__(self):
-        return iter((self.row, self.column))
-    
-    def __str__(self) -> str:
-        return f"{chr(ord('a') + self.column)}{self.row}"
-    
-    def __hash__(self) -> int:
-        return hash((self.row, self.column))
-    
-    def __eq__(self, other: object) -> bool:
-        if not isinstance(other, Point):
-            return False
-        return self.row == other.row and self.column == other.column
-    
+  
 
 """ Board management for the Battleship game
     The board is represented as a 2D numpy array of integers, where each integer represents the state of the cell (empty, ship, hit, miss).
@@ -134,24 +107,15 @@ class Board(Acceptor):
         return neighbors
     
     @staticmethod
-    def get_ship_surrounding(ship: Ship) -> set[Point]:
-        if ship.position is None:
-            raise ShipAllocationError(f"Ship {ship.name} has no position allocated")
+    def get_surroundings(point: Point) -> set[Point]:
+        surroundings: set[Point] = Board.get_neighbors(point)
         
-        ship_height, ship_width = ship.shape.shape
-
-        full_zone = {
-            Point(row, col)
-            for row in range(max(0, ship.position.row - 1), 
-                            min(Board.BOX_SIZE, ship.position.row + ship_height + 1))
-            for col in range(max(0, ship.position.column - 1), 
-                            min(Board.BOX_SIZE, ship.position.column + ship_width + 1))
-        }
+        # 2. Добавляем только диагонали
+        diagonals = [(-1, -1), (-1, 1), (1, -1), (1, 1)]
         
-        ship_cells = {
-            Point(row, col)
-            for row in range(ship.position.row, ship.position.row + ship_height)
-            for col in range(ship.position.column, ship.position.column + ship_width)
-        }
+        for dr, dc in diagonals:
+            row, col = point.row + dr, point.column + dc
+            if 0 <= row < Board.BOX_SIZE and 0 <= col < Board.BOX_SIZE:
+                surroundings.add(Point(row, col))
         
-        return full_zone - ship_cells
+        return surroundings

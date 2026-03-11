@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from abc import ABCMeta, abstractmethod
-from enum import IntEnum, StrEnum, auto
 import textwrap
 from typing import TYPE_CHECKING
 
@@ -9,27 +8,12 @@ import numpy as np
 from numpy.typing import NDArray
 
 from src.logic.acceptor import Acceptor
+from src.models import CellState, ShipType
 
 if TYPE_CHECKING:
     from src.models.board import Point
     from src.logic.fire import Visitor
 
-
-class CellState(IntEnum):
-    EMPTY = 0
-    SHIP = 1
-    HIT = 2
-    MISS = 3
-
-class ShipType(StrEnum):
-    SCOUT = auto()
-    DESTROYER = auto()
-    CRUISER = auto()
-    BATTLESHIP = auto()
-
-    @property
-    def description(self): 
-        return self.capitalize()
 
 class Ship(Acceptor, metaclass=ABCMeta):
     def __init__(self, type: ShipType, name: str, shape: NDArray[np.int_]) -> None:
