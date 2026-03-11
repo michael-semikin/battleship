@@ -1,7 +1,3 @@
-from __future__ import annotations
-
-from typing import TYPE_CHECKING
-
 from collections import Counter
 from collections.abc import Iterable
 import random
@@ -14,6 +10,7 @@ from src.logic.turn_controller import TurnController, TurnResult
 
 from src.models import Board, Player, Point
 
+from src.models.common import BOARD_SIZE
 from src.models.ship import Battleship, Cruiser, Destroyer, Scout, ShipType
 from src.models.turn import Action
 
@@ -57,8 +54,8 @@ class GameEngine:
                 for _ in range(GameEngine.MAX_SHIP_PLACEMENT_ATTEMPTS):  # try 100 times to find a valid position
                     ship.change_orientation(random.randint(0, len(ship.get_shapes()) - 1))
 
-                    column = random.randint(0, board.BOX_SIZE - 1)
-                    row = random.randint(0, board.BOX_SIZE - 1)
+                    column = random.randint(0, BOARD_SIZE - 1)
+                    row = random.randint(0, BOARD_SIZE - 1)
                     
                     if board.can_add_ship(ship, Point(row, column)):
                         board.add_ship(ship, Point(row, column))

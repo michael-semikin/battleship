@@ -19,8 +19,8 @@ class HunterInputProvider(InputProvider):
         
         # if no point to fire then i won :)
         while True:
-            row = random.randint(0, Board.BOX_SIZE - 1)
-            col = random.randint(0, Board.BOX_SIZE - 1)
+            row = random.randint(0, 9)
+            col = random.randint(0, 9)
             point = Point(row, col)
             
             if point not in self.shots_fired:

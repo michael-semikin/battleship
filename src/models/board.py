@@ -8,6 +8,7 @@ from numpy.typing import NDArray
 from src.logic.acceptor import Acceptor
 from src.logic.fire import Visitor
 from src.models.cell_state import CellState
+from src.models.common import BOARD_SIZE
 
 if TYPE_CHECKING:
     from src.exceptions.ship_allocation_error import ShipAllocationError
@@ -20,11 +21,11 @@ class Point:
     column: int
 
     def __post_init__(self):
-        if self.row < 0 or self.row >= Board.BOX_SIZE:
-            raise ValueError(f"Row must be between 0 and {Board.BOX_SIZE - 1}")
+        if self.row < 0 or self.row >= BOARD_SIZE:
+            raise ValueError(f"Row must be between 0 and {BOARD_SIZE - 1}")
 
-        if self.column < 0 or self.column >= Board.BOX_SIZE:
-            raise ValueError(f"Column must be between 0 and {Board.BOX_SIZE - 1}")
+        if self.column < 0 or self.column >= BOARD_SIZE:
+            raise ValueError(f"Column must be between 0 and {BOARD_SIZE - 1}")
 
     def __iter__(self):
         return iter((self.row, self.column))
@@ -46,13 +47,10 @@ class Point:
     The board also keeps track of the ships placed on it, and provides methods for adding ships, checking if a ship can be added, and getting the ship at a specific point.
     The board also implements the Visitor pattern to allow for firing at the board and applying damage to ships.
 """
-
-
 class Board(Acceptor):
-    BOX_SIZE = 10
-
     def __init__(self) -> None:
-        self.matrix: NDArray[np.int_] = np.zeros((10, 10), dtype=int)
+        self._matrix_size = BOARD_SIZE
+        self.matrix: NDArray[np.int_] = np.zeros((BOARD_SIZE, BOARD_SIZE), dtype=int)
         self._ships: list[Ship] = []
 
     def __getitem__(self, point: Point) -> CellState:
@@ -80,15 +78,15 @@ class Board(Acceptor):
         height, width = ship.shape.shape
 
         if (
-            position.row + height > self.BOX_SIZE
-            or position.column + width > self.BOX_SIZE
+            position.row + height > self._matrix_size
+            or position.column + width > self._matrix_size
         ):
             return False
 
         start_row = max(position.row - 1, 0)
-        end_row = min(position.row + height + 1, self.BOX_SIZE)
+        end_row = min(position.row + height + 1, self._matrix_size)
         start_col = max(position.column - 1, 0)
-        end_col = min(position.column + width + 1, self.BOX_SIZE)
+        end_col = min(position.column + width + 1, self._matrix_size)
 
         target_area = self.matrix[start_row:end_row, start_col:end_col]
 
@@ -102,7 +100,6 @@ class Board(Acceptor):
             point (Point): the point to check for a ship
         Returns:
             Ship | None: the ship at the given point, or None if there is no ship at that point"""
-
     def get_ship_at(self, point: Point) -> Ship | None:
         for ship in self._ships:
             if ship.position is None:
@@ -142,7 +139,7 @@ class Board(Acceptor):
 
         for dr, dc in directions:
             row, col = point.row + dr, point.column + dc
-            if 0 <= row < Board.BOX_SIZE and 0 <= col < Board.BOX_SIZE:
+            if 0 <= row < BOARD_SIZE and 0 <= col < BOARD_SIZE:
                 neighbors.add(Point(row, col))
         return neighbors
 
@@ -155,7 +152,7 @@ class Board(Acceptor):
 
         for dr, dc in diagonals:
             row, col = point.row + dr, point.column + dc
-            if 0 <= row < Board.BOX_SIZE and 0 <= col < Board.BOX_SIZE:
+            if 0 <= row < BOARD_SIZE and 0 <= col < BOARD_SIZE:
                 surroundings.add(Point(row, col))
 
         return surroundings

@@ -1,5 +1,6 @@
 from src.exceptions.input_error import InputError
-from src.models import Board, Point, Turn, TurnResult
+from src.models import Point, Turn, TurnResult
+from src.models.common import BOARD_SIZE
 from src.models.turn import Action
 from src.view.input_providers.input_provider import InputProvider
 
@@ -23,7 +24,7 @@ class ConsoleInputProvider(InputProvider):
         if column_part < 'a' or column_part > 'j':
             raise InputError("Column must be a letter from a to j")
 
-        if not row_part.isdigit() or int(row_part) < 0 or int(row_part) > Board.BOX_SIZE - 1:
+        if not row_part.isdigit() or int(row_part) < 0 or int(row_part) > BOARD_SIZE:
             raise InputError("Row must be a number from 0 to 9")
 
         row = int(row_part)

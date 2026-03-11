@@ -2,6 +2,7 @@
 from typing import Iterable
 
 from src.models import CellState, Board, Player, Point, ShipType
+from src.models.common import BOARD_SIZE
 from src.view.output_providers.view_provider import ViewProvider
 
 
@@ -19,7 +20,7 @@ class ConsoleViewProvider(ViewProvider):
     _HORIZONTAL_LINE, _VERTICAL_LINE   = "\u2500", "\u2502"  # ─, │
 
     def render(self, player: Player):
-        size = Board.BOX_SIZE
+        size = BOARD_SIZE
         
         # Вспомогательная функция для сборки одной строки любой доски
         def get_row_content(board_to_render: Board, row_idx: int) -> str:
@@ -55,7 +56,6 @@ class ConsoleViewProvider(ViewProvider):
             own_line = get_row_content(player.board, row_idx)
             radar_line = get_row_content(player.tracking_board, row_idx)
             
-            # Печать с 11 пробелами между вертикальными линиями
             print(f"{own_line}           {radar_line}")
 
         # bottom frame for both boards
@@ -63,14 +63,14 @@ class ConsoleViewProvider(ViewProvider):
         print(f"{bottom_edge}           {bottom_edge}")
 
     def render_stats(self, data: tuple[tuple[int, int], ...]):
-        stats_start_column = Board.BOX_SIZE * 6 + 5
-        self.print_at(Board.BOX_SIZE * 9 + 4, 1, "[ STATS ]")
-        self.print_at(Board.BOX_SIZE * 8, 2, "[ My Afloat ]")
-        self.print_at(Board.BOX_SIZE * 9 + 13, 2, "[ Enemy Killed ]")
+        stats_start_column = BOARD_SIZE * 6 + 5
+        self.print_at(BOARD_SIZE * 9 + 4, 1, "[ STATS ]")
+        self.print_at(BOARD_SIZE * 8, 2, "[ My Afloat ]")
+        self.print_at(BOARD_SIZE * 9 + 13, 2, "[ Enemy Killed ]")
         for idx, (ship, count) in enumerate(zip(ShipType, data)):
             self.print_at(stats_start_column, 3 + idx, f"{ship.description:10}: {count[0]:10} {count[1]:23}")
 
-        self.print_at(0, Board.BOX_SIZE + 5)
+        self.print_at(0, BOARD_SIZE + 5)
 
     def render_log(self, log: Iterable[str]):
         for log_entry in log:
