@@ -1,6 +1,5 @@
-from src.models.board import Board
+from src.models.board import Board, Point
 from src.models.cell_state import CellState, ShipType
-from src.models.point import Point
 
 from src.models.player import Player
 from src.models.ship import Ship

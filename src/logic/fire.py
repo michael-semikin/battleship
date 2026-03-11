@@ -5,11 +5,11 @@ from typing import TYPE_CHECKING
 
 from src.exceptions.already_hit_error import AlreadyHitError
 
+from src.models.cell_state import CellState
 if TYPE_CHECKING:
     from src.models.board import Board
     from src.models.board import Point
     from src.models.ship import Ship
-    from src.models import CellState
 
 class Visitor(metaclass=ABCMeta):
 
