@@ -1,18 +1,17 @@
 from __future__ import annotations
 
-from abc import ABCMeta, abstractmethod
 import textwrap
+from abc import ABCMeta, abstractmethod
 from typing import TYPE_CHECKING
 
 import numpy as np
 from numpy.typing import NDArray
-
 from src.logic.acceptor import Acceptor
 from src.models import CellState, ShipType
 
 if TYPE_CHECKING:
-    from src.models.board import Point
     from src.logic.fire import Visitor
+    from src.models.board import Point
 
 
 class Ship(Acceptor, metaclass=ABCMeta):

@@ -2,9 +2,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from src.models import Board
 from src.view.input_providers.input_provider import InputProvider
 
-from src.models import Board
 if TYPE_CHECKING:
     from src.models import CellState, Turn, TurnResult
 
