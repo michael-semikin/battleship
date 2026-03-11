@@ -89,7 +89,7 @@ class GameEngine:
         is_over = False
         turn_count = 0
         
-        while(True):
+        while True:
             # render view
             self._view_provider.clear_screen()
             self._view_provider.render(self._player_one)
@@ -97,7 +97,7 @@ class GameEngine:
             self._show_stats()
             self._view_provider.render_log(self._get_log())
 
-            if (is_over):
+            if is_over:
                 break
 
             # get user input for target cell
@@ -116,6 +116,7 @@ class GameEngine:
                 result = turn_controller.make_turn(player_input.point)
             except AlreadyHitError as err:
                 self._logger.log(f"{turn_controller.who_made_turn.name} Oops already hit at {err.point}")
+                continue
 
             self._logger.log(f"{turn_count}| {turn_controller.who_made_turn.name} {result.result.name}", player_input)
             turn_count += 1                
