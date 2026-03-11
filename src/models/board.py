@@ -14,8 +14,6 @@ if TYPE_CHECKING:
     from src.models.ship import Ship
     from src.exceptions.ship_allocation_error import ShipAllocationError
 
-
-
 @dataclass(frozen=True)
 class Point:
     row: int
@@ -33,6 +31,15 @@ class Point:
     
     def __str__(self) -> str:
         return f"{chr(ord('a') + self.column)}{self.row}"
+    
+    def __hash__(self) -> int:
+        return hash((self.row, self.column))
+    
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Point):
+            return False
+        return self.row == other.row and self.column == other.column
+    
 
 """ Board management for the Battleship game
     The board is represented as a 2D numpy array of integers, where each integer represents the state of the cell (empty, ship, hit, miss).
@@ -46,7 +53,6 @@ class Board(Acceptor):
         self.matrix: NDArray[np.int_] = np.zeros((10, 10), dtype=int)
         self._ships: list[Ship] = []
 
-    
     def __getitem__(self, point: Point) -> CellState:
         return CellState(self.matrix[*point])
 
@@ -67,13 +73,13 @@ class Board(Acceptor):
     def can_add_ship(self, ship: Ship, position: Point) -> bool:
         height, width = ship.shape.shape
 
-        if position.row + height > Board.BOX_SIZE or position.column + width > Board.BOX_SIZE:
+        if position.row + height > self.BOX_SIZE or position.column + width > self.BOX_SIZE:
             return False
         
         start_row = max(position.row - 1, 0)
-        end_row = min(position.row + height + 1, Board.BOX_SIZE)
+        end_row = min(position.row + height + 1, self.BOX_SIZE)
         start_col = max(position.column - 1, 0)
-        end_col = min(position.column + width + 1, Board.BOX_SIZE)
+        end_col = min(position.column + width + 1, self.BOX_SIZE)
 
         target_area = self.matrix[start_row:end_row, start_col:end_col]
 
@@ -114,4 +120,38 @@ class Board(Acceptor):
             point (Point): the point to target with the visitor's action"""
     def accept(self, visitor: Visitor, point: Point) -> CellState:
         return visitor.visit_board(self, point)
+    
+    @staticmethod
+    def get_neighbors(point: Point) -> set[Point]:
+        neighbors: set[Point] = set()
+        # horizontal neighbors
+        directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
         
+        for dr, dc in directions:
+            row, col = point.row + dr, point.column + dc
+            if 0 <= row < Board.BOX_SIZE and 0 <= col < Board.BOX_SIZE:
+                neighbors.add(Point(row, col))
+        return neighbors
+    
+    @staticmethod
+    def get_ship_surrounding(ship: Ship) -> set[Point]:
+        if ship.position is None:
+            raise ShipAllocationError(f"Ship {ship.name} has no position allocated")
+        
+        ship_height, ship_width = ship.shape.shape
+
+        full_zone = {
+            Point(row, col)
+            for row in range(max(0, ship.position.row - 1), 
+                            min(Board.BOX_SIZE, ship.position.row + ship_height + 1))
+            for col in range(max(0, ship.position.column - 1), 
+                            min(Board.BOX_SIZE, ship.position.column + ship_width + 1))
+        }
+        
+        ship_cells = {
+            Point(row, col)
+            for row in range(ship.position.row, ship.position.row + ship_height)
+            for col in range(ship.position.column, ship.position.column + ship_width)
+        }
+        
+        return full_zone - ship_cells

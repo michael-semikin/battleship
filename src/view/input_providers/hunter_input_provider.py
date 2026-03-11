@@ -2,8 +2,7 @@ import random
 from collections import deque
 
 from src.logic.turn_controller import TurnResult
-from src.models.board import Board, Point
-from src.models.turn import Action, Turn
+from src.models import Board, Point, Action, Turn
 from src.view.input_providers.input_provider import InputProvider
 
 class HunterInputProvider(InputProvider):
@@ -33,27 +32,11 @@ class HunterInputProvider(InputProvider):
             return
 
         if turn_result.ship.is_alive:
-            for neighbor in self._get_neighbors(turn_result.turn.point):
+            for neighbor in Board.get_neighbors(turn_result.turn.point):
                 if neighbor not in self.shots_fired:
                     self.hunt_queue.append(neighbor)
         else:
-            for neighbor in self._get_surrounding(turn_result.turn.point):
+            for neighbor in Board.get_ship_surrounding(turn_result.ship):
                 self.shots_fired.add(neighbor)            
             self.hunt_queue.clear()
     
-    def _get_neighbors(self, point: Point) -> list[Point]:
-        neighbors = []
-        for dr, dc in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
-            row, col = point.row + dr, point.column + dc
-            if 0 <= row < Board.BOX_SIZE and 0 <= col < Board.BOX_SIZE:
-                neighbors.append(Point(row, col))
-        return neighbors
-
-    def _get_surrounding(self, point: Point) -> list[Point]:
-        surrounding = self._get_neighbors(point)
-
-        for dr, dc in [(-1, -1), (-1, 1), (1, -1), (1, 1)]:
-            row, col = point.row + dr, point.column + dc
-            if 0 <= row < Board.BOX_SIZE and 0 <= col < Board.BOX_SIZE:
-                surrounding.append(Point(row, col))
-        return surrounding

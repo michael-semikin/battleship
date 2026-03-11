@@ -87,14 +87,20 @@ class GameEngine:
 
         is_over = False
         turn_count = 0
-        while(not is_over):
-            # ViewProvider.invalidate views
+        while(True):
+            # render view
             self._view_provider.clear_screen()
             self._view_provider.render(self._player_one)
 
             # create stat
             self._show_stats()
             self._view_provider.render_log(self._get_log())
+
+            if is_over:
+                # it is guaranteed that get_latest_turn() will return a TurnResult, because the game can only end after a turn is made
+                winner = cast(TurnResult, turn_controller.get_latest_turn()).player.name
+                self._logger.log(f"Game over! {winner} wins!")
+                break
 
             # get user input for target cell
             try:
@@ -119,9 +125,4 @@ class GameEngine:
             player_one_defeated = self._player_one.board.no_ships_remaining
             player_two_defeated = self._player_two.board.no_ships_remaining
             is_over = player_one_defeated or player_two_defeated
-        else:
-            # it is guaranteed that get_latest_turn() will return a TurnResult, because the game can only end after a turn is made
-            winner = cast(TurnResult, turn_controller.get_latest_turn()).player.name
-
-            self._logger.log(f"Game over! {winner} wins!")
-            self._view_provider.render_log(self._get_log())
+        
