@@ -3,7 +3,7 @@ from __future__ import annotations
 from abc import ABCMeta, abstractmethod
 from typing import TYPE_CHECKING
 
-from src.exceptions.already_hit_error import AlreadyHitError
+from src.exceptions import AlreadyHitError
 from src.models.board import Point
 from src.models.common import CellState
 

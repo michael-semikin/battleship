@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 import numpy as np
 from numpy.typing import NDArray
 
-from src.exceptions.ship_allocation_error import ShipAllocationError
+from src.exceptions import ShipAllocationError
 from src.logic.acceptor import Acceptor
 from src.models.common import BOARD_SIZE, CellState, Point
 from src.models.ship import Ship

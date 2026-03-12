@@ -1,10 +1,8 @@
 import random
 from collections import Counter
 from collections.abc import Iterable
-from typing import cast
 
-from src.exceptions.already_hit_error import AlreadyHitError
-from src.exceptions.input_error import InputError
+from src.exceptions import AlreadyHitError, InputError
 from src.logic.logger import GameLogger
 from src.logic.turn_controller import TurnController
 from src.models.board import Board, Point
