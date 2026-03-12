@@ -1,5 +1,26 @@
-# 🚢 About Game
-Battleship is a classic two-player guessing game where players try to sink each other's fleet of ships. It's like a naval combat played on grid boards!
+# 📖 Project Overview
+AI was utilized as a technical assistant (via web interface) to streamline the development process.
+
+## 🧑‍ My Responsibilities
+* Architectural Design (System-level decisions)
+* Design Patterns & Logic (Selection and implementation)
+* Tech Stack Selection
+* Core Development & Coding
+
+## 🤖 AI Contributions (Assistant)
+Consultation on:
+* Technical Documentation
+* Python Best Practices
+
+Supplementary support:
+* Unit Testing (Partial code generation)
+* Algorithm Optimization (Review and recommendations)
+
+
+### 🧠 Models Leveraged
+* Google Gemini
+* Qwen
+* Deepseek
 
 # 🛠️ Tech Stack
 - Python 3.12+
@@ -7,6 +28,10 @@ Battleship is a classic two-player guessing game where players try to sink each 
 - Additional packages: numpy
 - Testing: pytest
 - Build: hatchling, uv
+
+
+# 🚢 About Game
+Battleship is a classic two-player guessing game where players try to sink each other's fleet of ships. It's like a naval combat played on grid boards!
 
 # 🚀 Features
 * 🤖 Smart AI Opponent – Uses hunt-and-target logic (no cheap cheats).
