@@ -91,11 +91,7 @@ class GameEngine:
     def _has_winner(self) -> bool:
         player_one_defeated = self._player_one.board.no_ships_remaining
         player_two_defeated = self._player_two.board.no_ships_remaining
-        if player_one_defeated or player_two_defeated:
-            # it is guaranteed that who_made_turn() will return a player, because the game can only end after a turn is made
-            self._logger.log(f"Game won by {self._turn_controller.who_made_turn.name}")
-            return True
-        return False
+        return player_one_defeated or player_two_defeated
 
     def play(self):
         """ main loop
@@ -135,6 +131,8 @@ class GameEngine:
             # win/defeat condition
             if self._has_winner():
                 self._player_one.update_tracking_board(self._player_two.board)
+                # it is guaranteed that who_made_turn() will return a player, because the game can only end after a turn is made
+                self._logger.log(f"Game won by {self._turn_controller.who_made_turn.name}")
                 is_over = True                
 
 
