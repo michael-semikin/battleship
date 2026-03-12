@@ -26,7 +26,7 @@ class FireVisitor(Visitor):
         super().__init__()
 
     def visit_board(self, board: Board, point: Point) -> CellState:
-        hit_cell = board.matrix[*point]
+        hit_cell = board[point]
         
         if hit_cell in {CellState.HIT, CellState.MISS}:
             raise AlreadyHitError(point)
@@ -35,9 +35,9 @@ class FireVisitor(Visitor):
             target = board.get_ship_at(point)
             if target:
                 target.accept(self)
-                board.matrix[*point] = CellState.HIT
+                board[point] = CellState.HIT
         elif hit_cell == CellState.EMPTY:
-            board.matrix[*point] = CellState.MISS
+            board[point] = CellState.MISS
 
         return board[point]
 

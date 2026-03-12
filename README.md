@@ -1,9 +1,10 @@
-# ⚓ About
+# 🚢 About Game
 Battleship is a classic two-player guessing game where players try to sink each other's fleet of ships. It's like a naval combat played on grid boards!
 
 # 🛠️ Tech Stack
 - Python 3.12+
-- Architecture: OOP, SOLID principles, patterns
+- Architecture: OOP, SOLID principles, patterns (Vistor)
+- Additional packages: numpy
 - Testing: pytest
 - Build: hatchling, uv
 

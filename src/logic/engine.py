@@ -25,6 +25,7 @@ class GameEngine:
         self._player_one = Player("Player One", ConsoleInputProvider())
         self._player_two = Player("Player Two", HunterInputProvider())
         
+        self._turn_controller = TurnController(self._player_one, self._player_two)
         self._view_provider = view_provider
         self._logger = GameLogger()
         
@@ -32,10 +33,10 @@ class GameEngine:
         """ initializes the game by creating two players and filling their boards with ships
         """
 
-        self._player_one.set_board(self.fill_board())
-        self._player_two.set_board(self.fill_board())
+        self._player_one.set_board(self._fill_board())
+        self._player_two.set_board(self._fill_board())
 
-    def fill_board(self) -> Board:
+    def _fill_board(self) -> Board:
         """ fills the board with ships in random positions and orientations
             Returns:
                 Board: a board with ships placed on it
@@ -78,54 +79,62 @@ class GameEngine:
         ships_count = tuple(
                 (player_one_ships[ship_type, True], player_two_ships[ship_type, False]) for ship_type in ShipType
                 )
-        self._view_provider.render_stats(ships_count)    
+        self._view_provider.render_stats(ships_count)
+
+    def update_display(self):
+            self._view_provider.clear_screen()
+            self._view_provider.render(self._player_one)
+
+            self._show_stats()
+            self._view_provider.render_log(self._get_log())
     
+    def _has_winner(self) -> bool:
+        player_one_defeated = self._player_one.board.no_ships_remaining
+        player_two_defeated = self._player_two.board.no_ships_remaining
+        if player_one_defeated or player_two_defeated:
+            # it is guaranteed that who_made_turn() will return a player, because the game can only end after a turn is made
+            self._logger.log(f"Game won by {self._turn_controller.who_made_turn.name}")
+            return True
+        return False
+
     def play(self):
         """ main loop
         """
-
-        turn_controller = TurnController(self._player_one, self._player_two)
 
         is_over = False
         turn_count = 0
         
         while True:
             # render view
-            self._view_provider.clear_screen()
-            self._view_provider.render(self._player_one)
-
-            self._show_stats()
-            self._view_provider.render_log(self._get_log())
+            self.update_display()
 
             if is_over:
                 break
 
-            # get user input for target cell
+            # main action
             try:
-                player_input = turn_controller.who_makes_turn.get_input()
+                player_input = self._turn_controller.who_makes_turn.get_input()
             except InputError as err:
-                self._logger.log(f"{turn_controller.who_makes_turn.name} Invalid input: {err}")
+                self._logger.log(f"{self._turn_controller.who_makes_turn.name} Invalid input: {err}")
                 continue
 
             if player_input.action == Action.QUIT:
-                self._logger.log(f"Game stopped by {turn_controller.who_makes_turn.name}")
+                self._logger.log(f"Game stopped by {self._turn_controller.who_makes_turn.name}")
                 is_over = True
                 continue
 
             try:
-                result = turn_controller.make_turn(player_input.point)
+                result = self._turn_controller.make_turn(player_input.point)
             except AlreadyHitError as err:
-                self._logger.log(f"{turn_controller.who_made_turn.name} Oops already hit at {err.point}")
+                self._logger.log(f"{self._turn_controller.who_made_turn.name} Oops already hit at {err.point}")
                 continue
 
-            self._logger.log(f"{turn_count}| {turn_controller.who_made_turn.name} {result.result.name}", player_input)
+            self._logger.log(f"{turn_count}| {self._turn_controller.who_made_turn.name} {result.result.name}", player_input)
             turn_count += 1                
 
-            player_one_defeated = self._player_one.board.no_ships_remaining
-            player_two_defeated = self._player_two.board.no_ships_remaining
-            if player_one_defeated or player_two_defeated:
-                # it is guaranteed that who_made_turn() will return a player, because the game can only end after a turn is made
-                self._logger.log(f"Game won by {turn_controller.who_made_turn.name}")
+            # win/defeat condition
+            if self._has_winner():
+                self._player_one.update_tracking_board(self._player_two.board)
                 is_over = True                
 
 

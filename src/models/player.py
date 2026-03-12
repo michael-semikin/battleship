@@ -1,5 +1,7 @@
+from functools import singledispatchmethod
+
 from src.models.board import Board
-from src.models.common import CellState
+from src.models.common import CellState, Point
 from src.models.turn import Turn
 from src.models.turn_result import TurnResult
 from src.view.input_providers.input_provider import InputProvider
@@ -29,12 +31,28 @@ class Player:
     def set_board(self, value: Board):
         self._main_board = value
 
-    def update_tracking_board(self, point, result: CellState):
+    @singledispatchmethod
+    def update_tracking_board(self, target, result: CellState | None = None):
+        """ Generic entry point for updating the board. 
+            Dispatches based on the type of 'target'.
+        """        
+        raise NotImplementedError(f"Unsupported target type: {type(target)}")
+    
+    @update_tracking_board.register
+    def _(self, point: Point, result: CellState):
         """ updates the tracking board with the result of a shot
             Args:
                 point (Point): the point that was shot at
                 result (CellState): the result of the shot (HIT or MISS)
         """
  
-        self._tracking_board.matrix[point.row, point.column] = result
+        self._tracking_board[point] = result
     
+    @update_tracking_board.register
+    def _(self, board: Board, *args):
+        """ updates the tracking board with the board passed
+            Args:
+                board (Point): the point that was shot at
+        """
+
+        self._tracking_board = board
