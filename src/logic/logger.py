@@ -13,7 +13,7 @@ class LogEntry:
 
 class GameLogger:
     def __init__(self, maxsize = 15) -> None:
-        self._logs = deque(maxlen=maxsize)
+        self._logs: deque[LogEntry] = deque(maxlen=maxsize)
 
     def log(self, msg: str, turn: Turn | None = None):
         self._logs.append(LogEntry(msg, datetime.now(), turn))

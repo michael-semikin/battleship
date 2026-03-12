@@ -4,7 +4,7 @@ from abc import ABCMeta, abstractmethod
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from src.logic.fire import Visitor
+    from src.logic.fire_visitor import Visitor
     from src.models.board import Point
 
 class Acceptor(metaclass=ABCMeta):

@@ -12,7 +12,7 @@ from src.models.board import Point
 from src.models.common import CellState, ShipType
 
 if TYPE_CHECKING:
-    from src.logic.fire import Visitor
+    from src.logic.fire_visitor import Visitor
 
 
 class Ship(Acceptor, metaclass=ABCMeta):

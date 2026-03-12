@@ -1,4 +1,4 @@
-from src.logic.fire import FireVisitor
+from src.logic.fire_visitor import FireVisitor
 from src.models.player import Player
 from src.models.ship import CellState
 from src.models.turn import Action, Turn

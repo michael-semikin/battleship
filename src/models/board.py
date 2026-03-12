@@ -11,7 +11,7 @@ from src.models.common import BOARD_SIZE, CellState, Point
 from src.models.ship import Ship
 
 if TYPE_CHECKING:
-    from src.logic.fire import Visitor
+    from src.logic.fire_visitor import Visitor
 
 """ Board management for the Battleship game
     The board is represented as a 2D numpy array of integers, where each integer represents the state of the cell (empty, ship, hit, miss).
