@@ -1,0 +1,14 @@
+# .dockerignore
+.git
+.gitignore
+.mypy_cache
+.pytest_cache
+.venv
+.vscode
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+node_modules
+docker-compose.yml
+.DS_Store

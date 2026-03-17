@@ -37,6 +37,7 @@ class TurnController:
 
         latest_turn = TurnResult(Turn(Action.SHOT, point),  opponent_player.board.get_ship_at(point), result)
 
+        # TODO: make it through the tracking_board
         # provide feedback to the player about the result of their turn
         current_player.take_turn_result(latest_turn)
 

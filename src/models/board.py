@@ -30,23 +30,31 @@ class Board(Acceptor):
     def __setitem__(self, point: Point, value: CellState):
         self.matrix[*point] = value
 
+    @property
+    def ships(self) -> list[Ship]:
+        return self._ships
+
+    @property
+    def no_ships_remaining(self) -> bool:
+        return all(not ship.is_alive for ship in self._ships)
+    
     def add_ship(self, ship: Ship, position: Point):
         if not self.can_add_ship(ship, position):
             raise ShipAllocationError(
                 f"Cannot add ship {ship.name} at position {position}"
             )
 
-        for row_idx in range(ship.shape.shape[0]):
-            for col_idx in range(ship.shape.shape[1]):
+        for row_idx in range(ship.form.shape[0]):
+            for col_idx in range(ship.form.shape[1]):
                 self.matrix[position.row + row_idx, position.column + col_idx] = (
-                    ship.shape[row_idx, col_idx]
+                    ship.form[row_idx, col_idx]
                 )
 
         self._ships.append(ship)
         ship.position = position
 
     def can_add_ship(self, ship: Ship, position: Point) -> bool:
-        height, width = ship.shape.shape
+        height, width = ship.form.shape
 
         if (
             position.row + height > self._matrix_size
@@ -77,7 +85,7 @@ class Board(Acceptor):
                 raise ShipAllocationError(f"Ship {ship.name} has no position allocated")
 
             ship_row, ship_column = ship.position
-            ship_height, ship_width = ship.shape.shape
+            ship_height, ship_width = ship.form.shape
 
             if (ship_row <= point.row < ship_row + ship_height) and (
                 ship_column <= point.column < ship_column + ship_width
@@ -85,14 +93,6 @@ class Board(Acceptor):
                 return ship
 
         return None
-
-    @property
-    def ships(self) -> list[Ship]:
-        return self._ships
-
-    @property
-    def no_ships_remaining(self) -> bool:
-        return all(not ship.is_alive for ship in self._ships)
 
     """ Accepts a visitor to perform an action on the board, such as firing at a specific point.
         Args:

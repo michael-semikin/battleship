@@ -19,7 +19,7 @@ class Ship(Acceptor, metaclass=ABCMeta):
     def __init__(self, type: ShipType, name: str, shape: NDArray[np.int_]) -> None:
         self.type: ShipType = type
         self.name: str = name
-        self.shape: NDArray[np.int_] = shape
+        self.form: NDArray[np.int_] = shape
         
         self.position: Point| None = None
         self.hit_points: int = 0
@@ -29,14 +29,14 @@ class Ship(Acceptor, metaclass=ABCMeta):
         raise NotImplementedError
     
     def change_orientation(self, orientation: int):
-        if self.shape is None:
+        if self.form is None:
             raise ValueError("Ship shape is not set")
         
         if orientation < 0 or orientation >= len(self.get_shapes()):
             raise ValueError(f"Invalid orientation {orientation} for ship {self.name}")
         
         shapes = self.get_shapes()
-        self.shape = shapes[orientation]
+        self.form = shapes[orientation]
 
     @property
     def is_alive(self) -> bool:
@@ -55,7 +55,7 @@ class Ship(Acceptor, metaclass=ABCMeta):
         return textwrap.dedent(f"""
             {self.name}:
             Type: {self.type}
-            Shape: {self.shape}
+            Shape: {self.form}
             Position: {self.position}
         """)
 
@@ -65,25 +65,25 @@ class Scout(Ship):
         self.hit_points = 1
 
     def get_shapes(self) -> tuple[NDArray[np.int_], ...]:
-        return (self.shape,)
+        return (self.form,)
     
 class Destroyer(Ship):
     def __init__(self) -> None:
         super().__init__(ShipType.DESTROYER, "Destroyer", np.array([[CellState.SHIP] * 2]))
         self.hit_points = 2
     def get_shapes(self) -> tuple[NDArray[np.int_], ...]:
-        return (self.shape, self.shape.T)
+        return (self.form, self.form.T)
 
 class Cruiser(Ship):
     def __init__(self) -> None:
         super().__init__(ShipType.CRUISER, "Cruiser", np.array([[CellState.SHIP] * 3]))
         self.hit_points = 3
     def get_shapes(self) -> tuple[NDArray[np.int_], ...]:
-        return (self.shape, self.shape.T)
+        return (self.form, self.form.T)
 
 class Battleship(Ship):
     def __init__(self) -> None:
         super().__init__(ShipType.BATTLESHIP, "Battleship", np.array([[CellState.SHIP] * 4]))
         self.hit_points = 4
     def get_shapes(self) -> tuple[NDArray[np.int_], ...]:
-        return (self.shape, self.shape.T)
+        return (self.form, self.form.T)

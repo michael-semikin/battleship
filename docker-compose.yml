@@ -1,0 +1,19 @@
+services:
+  redis:
+    image: redis:7.2-alpine
+    container_name: battleship-redis
+    ports:
+      - "6379:6379"  # Expose Redis port to host for external access
+    volumes:
+      - redis_data:/data  # Persist data across container restarts
+    command: redis-server --appendonly yes  # Enable data persistence
+    restart: always  # Auto-restart container on failure
+    networks:
+      - battleship-net
+
+volumes:
+  redis_data:
+
+networks:
+  battleship-net:
+    driver: bridge
