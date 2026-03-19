@@ -1,7 +1,6 @@
-from datetime import datetime
 from enum import IntEnum
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from src.models.common import ShipType
 
@@ -26,10 +25,9 @@ class Ship(BaseModel):
 
 
 class PlayerInfo(BaseModel):
-    session_id: str
     name: str
-    main_board: tuple[tuple[int]]
-    tracking_board: tuple[tuple[int]]
+    main_board: tuple[tuple[int, ...], ...] = Field(alias="board")
+    tracking_board: tuple[tuple[int, ...], ...] = Field(alias="trackingBoard")
 
 class PlayerTurn(BaseModel):
     session_id: str

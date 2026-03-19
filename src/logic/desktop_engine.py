@@ -1,69 +1,19 @@
-import random
 from collections import Counter
 from collections.abc import Iterable
 
 from src.exceptions import AlreadyHitError, InputError
-from src.logic.logger import GameLogger
-from src.logic.turn_controller import TurnController
-from src.models.board import Board, Point
-from src.models.common import BOARD_SIZE
+from src.logic.game_engine import GameEngine
 from src.models.player import Player
-from src.models.ship import Battleship, Cruiser, Destroyer, Scout, ShipType
+from src.models.ship import ShipType
 from src.models.turn import Action
-from src.view.input_providers.console_input_provider import \
-    ConsoleInputProvider
-from src.view.input_providers.hunter_input_provider import HunterInputProvider
+
 from src.view.output_providers.view_provider import ViewProvider
 
 
-class GameEngine:
-    MAX_SHIP_PLACEMENT_ATTEMPTS = 100
-
+class DesktopGameEngine(GameEngine):
     def __init__(self, view_provider: ViewProvider) -> None:
-        self._player_one = Player("Player One", ConsoleInputProvider())
-        self._player_two = Player("Player Two", HunterInputProvider())
-        
-        self._turn_controller = TurnController(self._player_one, self._player_two)
-        self._view_provider = view_provider
-        self._logger = GameLogger()
-        
-    def init_game(self):
-        """ initializes the game by creating two players and filling their boards with ships
-        """
-
-        self._player_one.set_board(self._fill_board())
-        self._player_two.set_board(self._fill_board())
-
-    def _fill_board(self) -> Board:
-        """ fills the board with ships in random positions and orientations
-            Returns:
-                Board: a board with ships placed on it
-        """
-
-        board = Board()
-
-        # add ships to board
-        fleet = ((Battleship, 1), (Cruiser, 2), (Destroyer, 3), (Scout, 4))
-
-        for ship_type, count in fleet:
-            for _ in range(count):             
-                ship = ship_type()
-
-                # find a random position and orientation for the ship
-                for _ in range(GameEngine.MAX_SHIP_PLACEMENT_ATTEMPTS):  # try 100 times to find a valid position
-                    ship.change_orientation(random.randint(0, len(ship.get_shapes()) - 1))
-
-                    column = random.randint(0, BOARD_SIZE - 1)
-                    row = random.randint(0, BOARD_SIZE - 1)
-                    
-                    if board.can_add_ship(ship, Point(row, column)):
-                        board.add_ship(ship, Point(row, column))
-                        break
-                else:
-                    raise RuntimeError(f"Failed to place ship {ship.name} after {GameEngine.MAX_SHIP_PLACEMENT_ATTEMPTS} attempts")
-                
-        return board
-
+        super().__init__(view_provider)
+ 
     def _get_log(self)-> Iterable[str]:
         return tuple(f"{entry.date}: {entry.message} : {'shot at' if entry.turn else ' '} {entry.turn.point if entry.turn else ''}" 
                      for entry in self._logger.get_logs())
@@ -79,7 +29,7 @@ class GameEngine:
                 )
         self._view_provider.render_stats(ships_count)
 
-    def update_display(self):
+    def _update_display(self):
             self._view_provider.clear_screen()
             self._view_provider.render(self._player_one)
 
@@ -97,17 +47,19 @@ class GameEngine:
 
         is_over = False
         turn_count = 0
+
+        self._turn_controller.turn_made = lambda player, latest_turn: self._player_inputs[player].notify_result(latest_turn)
         
         while True:
             # render view
-            self.update_display()
+            self._update_display()
 
             if is_over:
                 break
 
             # main action
             try:
-                player_input = self._turn_controller.who_makes_turn.get_input()
+                player_input = self._player_inputs[self._turn_controller.who_makes_turn].get_input()
             except InputError as err:
                 self._logger.log(f"{self._turn_controller.who_makes_turn.name} Invalid input: {err}")
                 continue
@@ -132,6 +84,3 @@ class GameEngine:
                 # it is guaranteed that who_made_turn() will return a player, because the game can only end after a turn is made
                 self._logger.log(f"Game won by {self._turn_controller.who_made_turn.name}")
                 is_over = True                
-
-
-    

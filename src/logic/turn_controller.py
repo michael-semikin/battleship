@@ -1,3 +1,5 @@
+from typing import Callable
+
 from src.logic.fire_visitor import FireVisitor
 from src.models.player import Player
 from src.models.ship import CellState
@@ -10,6 +12,16 @@ class TurnController:
         self._players = {0: player_one, 1: player_two}
         self._current_player_index = 0
         self._who_made_turn: Player | None = None
+
+        self._on_turn_made: Callable[[Player, TurnResult], None] | None = None
+
+    @property
+    def turn_made(self):
+        return self._on_turn_made
+    
+    @turn_made.setter
+    def turn_made(self, func):
+        self._on_turn_made = func
 
     @property
     def who_makes_turn(self) -> Player:
@@ -39,7 +51,8 @@ class TurnController:
 
         # TODO: make it through the tracking_board
         # provide feedback to the player about the result of their turn
-        current_player.take_turn_result(latest_turn)
+        if self._on_turn_made:
+            self._on_turn_made(current_player, latest_turn)
 
         self._who_made_turn = current_player
 
