@@ -25,10 +25,10 @@ Supplementary support:
 # 🛠️ Tech Stack
 - Python 3.12+
 - Architecture: OOP, SOLID principles, patterns (Vistor)
-- Additional packages: numpy
+- Additional packages: numpy, 
 - Testing: pytest
 - Build: hatchling, uv
-
+- Web: Vue 3, Typescript, Html/Css, socket.io, axios, FastApi, FastSession
 
 # 🚢 About Game
 Battleship is a classic two-player guessing game where players try to sink each other's fleet of ships. It's like a naval combat played on grid boards!
