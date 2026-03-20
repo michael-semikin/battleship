@@ -1,9 +1,10 @@
+from collections import Counter
 import random
 
 from src.logic.logger import GameLogger
 from src.logic.turn_controller import TurnController
 from src.models.board import Board
-from src.models.common import BOARD_SIZE, Point
+from src.models.common import BOARD_SIZE, Point, ShipType
 from src.models.player import Player
 from src.models.ship import Battleship, Cruiser, Destroyer, Scout
 from src.view.input_providers.input_provider import InputProvider
@@ -30,7 +31,18 @@ class GameEngine:
     
     @property
     def turn_controller(self) -> TurnController:
-        return self._turn_controller        
+        return self._turn_controller
+    
+    def _get_ships_count(self, player: Player) -> Counter:
+        return Counter((ship.type, ship.is_alive) for ship in player.board.ships)
+        
+    def calculate_stats(self) -> tuple[tuple[int, int], ...]:
+        player_one_ships = self._get_ships_count(self._player_one)
+        player_two_ships = self._get_ships_count(self._player_two)
+        ships_count = tuple(
+                (player_one_ships[ship_type, True], player_two_ships[ship_type, False]) for ship_type in ShipType
+                )
+        return ships_count
 
     def init_game(self, input_provider_one: InputProvider | None, input_provider_two: InputProvider | None):
         """ initializes the game by creating two players and filling their boards with ships

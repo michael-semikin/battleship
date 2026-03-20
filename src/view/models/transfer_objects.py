@@ -23,7 +23,6 @@ class Ship(BaseModel):
     form: ShipForm
     position: Point
 
-
 class PlayerInfo(BaseModel):
     name: str
     main_board: tuple[tuple[int, ...], ...] = Field(alias="board")
@@ -33,3 +32,8 @@ class PlayerTurn(BaseModel):
     session_id: str
     name: str
     point: Point
+
+class GameStat(BaseModel):
+    ship_type: str = Field(alias="shipType")
+    player_one_count: int = Field(alias="playerOneCount")
+    player_two_count: int = Field(alias="playerTwoCount")

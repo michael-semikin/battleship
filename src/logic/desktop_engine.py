@@ -1,10 +1,7 @@
-from collections import Counter
 from collections.abc import Iterable
 
 from src.exceptions import AlreadyHitError, InputError
 from src.logic.game_engine import GameEngine
-from src.models.player import Player
-from src.models.ship import ShipType
 from src.models.turn import Action
 
 from src.view.output_providers.view_provider import ViewProvider
@@ -18,23 +15,15 @@ class DesktopGameEngine(GameEngine):
     def _get_log(self)-> Iterable[str]:
         return tuple(f"{entry.date}: {entry.message} : {'shot at' if entry.turn else ' '} {entry.turn.point if entry.turn else ''}" 
                      for entry in self._logger.get_logs())
-       
-    def _get_ships_count(self, player: Player) -> Counter:
-        return Counter((ship.type, ship.is_alive) for ship in player.board.ships)
     
-    def _show_stats(self):
-        player_one_ships = self._get_ships_count(self._player_one)
-        player_two_ships = self._get_ships_count(self._player_two)
-        ships_count = tuple(
-                (player_one_ships[ship_type, True], player_two_ships[ship_type, False]) for ship_type in ShipType
-                )
-        self._view_provider.render_stats(ships_count)
+    def display_stats(self):
+        self._view_provider.render_stats(self.calculate_stats())     
 
     def _update_display(self):
             self._view_provider.clear_screen()
             self._view_provider.render(self._player_one)
 
-            self._show_stats()
+            self.display_stats()
             self._view_provider.render_log(self._get_log())
     
     def _has_winner(self) -> bool:

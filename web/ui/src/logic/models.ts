@@ -16,3 +16,9 @@ export interface IPoint {
     row: number
     column: number
 }
+
+export interface IGameStat {
+    shipType: string
+    playerOneCount: number
+    playerTwoCount: number
+}

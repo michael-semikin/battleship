@@ -2,17 +2,20 @@
 
 import GameBoard from './components/GameBoard.vue';
 import type { IPoint } from './logic/models';
-import { useGameStart, useMakeTurn } from './logic/services/apiService';
+import { useGameStart, useGameStats, useMakeTurn } from './logic/services/apiService';
 
 const {playerName, boardData, trackingData, getPlayerInfo} = useGameStart();
 const { makeTurn } = useMakeTurn();
+const { stats, getGameStats } = useGameStats();
 
 const boardClikced = async (point: IPoint) => {
-  makeTurn(point);
+  await makeTurn(point);
+  await getGameStats();
 }
 
-const connect = () => {
-  getPlayerInfo();
+const connect = async () => {
+  await getPlayerInfo();
+  await getGameStats();
 }
 
 </script>
@@ -27,7 +30,21 @@ const connect = () => {
       <GameBoard :player-name="playerName" :board-data="boardData"></GameBoard>
       <GameBoard :player-name="'Enemy'" :board-data="trackingData" @board-clicked="boardClikced"></GameBoard>
 
-      <div>[Stats]</div>
+      <div class="stats">
+        <div></div>
+        <div class="header">[Stats]</div>
+
+        <div></div>
+        <div class="stat-data">[My Afloat]</div>
+        <div class="stat-data">[Enemy Killed]</div>
+
+        <div v-for="(item, index) in stats" :key="index" style="display: contents;">
+          <div>{{ item.shipType }}:</div>
+          <div class="stat-data">{{ item.playerOneCount }}</div>
+          <div class="stat-data">{{ item.playerTwoCount }}</div>          
+        </div>
+
+      </div>
     </div>
 
     <div class="actions">
@@ -40,6 +57,26 @@ const connect = () => {
 </template>
 
 <style scoped>
+  .stats {
+    display: grid;
+    gap: 1px;
+    width: max-content;
+    height: max-content;
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+
+  .stats .header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    grid-column: 2 / span 2;
+  }
+
+  .stats .stat-data {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 
   .boards-layout {
     display: flex;

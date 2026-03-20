@@ -1,6 +1,6 @@
 import axios from "axios";
 import { ref } from "vue";
-import type { IPoint } from "../models";
+import type { IGameStat, IPoint } from "../models";
 
 const apiClient = axios.create({
   baseURL: 'http://localhost:8000/game',
@@ -29,7 +29,7 @@ export function useMakeTurn() {
         const sendMakeTurn = apiClient.post('/make_turn', point, { withCredentials: true });
         await sendMakeTurn;
 
-        const response = apiClient.post('/update_board', {}, { withCredentials: true });
+        const response = apiClient.get('/update_board', { withCredentials: true });
         const data = (await response).data;
 
         playerName.value = data.name;
@@ -38,4 +38,21 @@ export function useMakeTurn() {
     }
 
     return { playerName, boardData, trackingData, makeTurn }
+}
+
+export function useGameStats() {
+    const stats = ref<IGameStat[]>([])
+
+    const getGameStats = async () => {
+        const response = apiClient.get('/get_stats', { withCredentials: true });
+        const data = (await response).data as IGameStat[];
+        
+        stats.value = data.map(x => ({
+            shipType: x.shipType,
+            playerOneCount: x.playerOneCount,
+            playerTwoCount: x.playerTwoCount
+        }));
+    }
+
+    return { stats, getGameStats }
 }
