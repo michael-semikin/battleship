@@ -1,33 +1,14 @@
 <script setup lang="ts">
 
-import { ref } from 'vue';
-import axios from 'axios';
 import GameBoard from './components/GameBoard.vue';
+import type { IPoint } from './logic/models';
+import { useGameStart, useMakeTurn } from './logic/services/apiService';
 
-const apiClient = axios.create({
-  baseURL: 'http://localhost:8000/game',
-  timeout: 10000
-});
+const {playerName, boardData, trackingData, getPlayerInfo} = useGameStart();
+const { makeTurn } = useMakeTurn();
 
-// test
-const playerName = ref('')
-const boardData = ref(Array(10).fill(0).map(() => Array(10).fill(0)))
-const trackingData = ref(Array(10).fill(0).map(() => Array(10).fill(0)))
-
-const getPlayerInfo = async () => {
-  const response = apiClient.post('/start');
-  const data = (await response).data;
-
-  playerName.value = data.name;
-  boardData.value = data.board;
-  trackingData.value = data.trackingBoard;
-
-  console.log(data);
-
-  const xx = apiClient.post('/make_turn', { row: 2, column: 3 });
-
-  const dd = (await xx).data;
-  console.log(dd);
+const boardClikced = async (point: IPoint) => {
+  makeTurn(point);
 }
 
 const connect = () => {
@@ -44,7 +25,7 @@ const connect = () => {
     <div class="boards-layout">
 
       <GameBoard :player-name="playerName" :board-data="boardData"></GameBoard>
-      <GameBoard :board-data="trackingData"></GameBoard>
+      <GameBoard :player-name="'Enemy'" :board-data="trackingData" @board-clicked="boardClikced"></GameBoard>
 
       <div>[Stats]</div>
     </div>

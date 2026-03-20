@@ -12,7 +12,8 @@ from src.view.output_providers.view_provider import ViewProvider
 
 class DesktopGameEngine(GameEngine):
     def __init__(self, view_provider: ViewProvider) -> None:
-        super().__init__(view_provider)
+        super().__init__()
+        self._view_provider = view_provider
  
     def _get_log(self)-> Iterable[str]:
         return tuple(f"{entry.date}: {entry.message} : {'shot at' if entry.turn else ' '} {entry.turn.point if entry.turn else ''}" 

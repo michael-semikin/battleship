@@ -12,3 +12,6 @@ class InputProvider(ABC):
     @abstractmethod
     def notify_result(self, turn_result: TurnResult):
         pass
+
+    def get_external_input(self, turn: Turn):
+        raise NotImplementedError()

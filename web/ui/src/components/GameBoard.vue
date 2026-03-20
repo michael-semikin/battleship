@@ -1,22 +1,14 @@
 <script setup lang="ts">
-    defineProps<{
-        playerName?: string,
-        boardData: number[][]
-    }>()
+import { CellState, type IBoardCell, type IPoint } from '@/logic/models';
 
-enum CellState {
-    Empty = 0,
-    Ship = 1,
-    Hit = 2,
-    Miss = 3
-}
+defineProps<{
+    playerName: string,
+    boardData: number[][]
+}>()
 
-interface IBoardCell {
-  index: number
-  cssClasses: string[],
-  dataRow: number, 
-  dataColumn: number
-}
+const emit = defineEmits<{
+    boardClicked: [point: IPoint]
+}>()
 
 const getBoardCells = (matrix: number[][]) => {
   const cells: IBoardCell[] = [];
@@ -54,6 +46,21 @@ const getBoardCells = (matrix: number[][]) => {
   return cells;
 }
 
+const onBoardClicked = (event: MouseEvent) => {
+    const target = event.target as HTMLElement;
+    const cell = target.closest('.field-cell');
+    
+    if (cell instanceof HTMLElement) {
+        const row = Number(cell.dataset.row);
+        const column = Number(cell.dataset.column);
+        
+        emit('boardClicked', {
+            row,
+            column
+        });
+    }
+}
+
 </script>
 
 <template>
@@ -66,8 +73,8 @@ const getBoardCells = (matrix: number[][]) => {
         </div>
 
         <div class="board">
-            <div class="battlefield">
-            <div v-for="cell in getBoardCells(boardData)" :key="cell.index" :class="cell.cssClasses" :data-row="cell.dataRow" :data-column="cell.dataColumn">.</div>
+            <div class="battlefield" @click="onBoardClicked">
+            <div v-for="cell in getBoardCells(boardData)" :key="cell.index" :class="cell.cssClasses" :data-row="cell.dataRow" :data-column="cell.dataColumn"></div>
             </div>
         </div>
 
@@ -81,7 +88,7 @@ const getBoardCells = (matrix: number[][]) => {
     </div>
 </template>
 
-<style scoped>
+<style lang="scss" scoped>
   .board-container {
     display: grid;
     gap: 1px;

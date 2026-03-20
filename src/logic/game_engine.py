@@ -7,20 +7,17 @@ from src.models.common import BOARD_SIZE, Point
 from src.models.player import Player
 from src.models.ship import Battleship, Cruiser, Destroyer, Scout
 from src.view.input_providers.input_provider import InputProvider
-from src.view.output_providers.view_provider import ViewProvider
-
 
 class GameEngine:
     MAX_SHIP_PLACEMENT_ATTEMPTS = 100
     
-    def __init__(self, view_provider: ViewProvider | None = None) -> None:
+    def __init__(self) -> None:
         self._player_one = Player("Player One")
         self._player_two = Player("Player Two")
 
         self._player_inputs: dict[Player, InputProvider] = { }
         
         self._turn_controller = TurnController(self._player_one, self._player_two)
-        self._view_provider = view_provider
         self._logger = GameLogger()
 
     @property
@@ -29,7 +26,11 @@ class GameEngine:
     
     @property
     def player_two(self) -> Player:
-        return self._player_two    
+        return self._player_two
+    
+    @property
+    def turn_controller(self) -> TurnController:
+        return self._turn_controller        
 
     def init_game(self, input_provider_one: InputProvider | None, input_provider_two: InputProvider | None):
         """ initializes the game by creating two players and filling their boards with ships
