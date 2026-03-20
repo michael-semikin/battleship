@@ -4,7 +4,7 @@ import type { IGameStat, IPoint } from "../models";
 
 const apiClient = axios.create({
   baseURL: 'http://localhost:8000/game',
-  timeout: 10000
+  timeout: 1000000
 });
 
 const playerName = ref('')
@@ -32,6 +32,10 @@ export function useMakeTurn() {
         const response = apiClient.get('/update_board', { withCredentials: true });
         const data = (await response).data;
 
+        if (!data) {
+            return;
+        }
+
         playerName.value = data.name;
         boardData.value = data.board;
         trackingData.value = data.trackingBoard;
@@ -46,6 +50,10 @@ export function useGameStats() {
     const getGameStats = async () => {
         const response = apiClient.get('/get_stats', { withCredentials: true });
         const data = (await response).data as IGameStat[];
+
+        if (!data) {
+            return;
+        }
         
         stats.value = data.map(x => ({
             shipType: x.shipType,
@@ -55,4 +63,13 @@ export function useGameStats() {
     }
 
     return { stats, getGameStats }
+}
+
+export function useGameOver() {
+    const gameOver = async () => {
+        const response = apiClient.post('/set_game_over', {}, { withCredentials: true });
+        await response;      
+    }
+
+    return { gameOver }
 }

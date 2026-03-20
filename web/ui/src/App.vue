@@ -2,23 +2,26 @@
 
 import GameBoard from './components/GameBoard.vue';
 import type { IPoint } from './logic/models';
-import { useGameStart, useGameStats, useMakeTurn } from './logic/services/apiService';
-import { socketState } from './logic/services/socketService';
+import { useGameOver, useGameStart, useGameStats, useMakeTurn } from './logic/services/apiService';
+import { socket, socketState } from './logic/services/socketService';
 
 const {playerName, boardData, trackingData, getPlayerInfo} = useGameStart();
 const { makeTurn } = useMakeTurn();
 const { stats, getGameStats } = useGameStats();
-
+const { gameOver } = useGameOver();
 
 
 const boardClikced = async (point: IPoint) => {
   await makeTurn(point);
   await getGameStats();
+  await gameOver();
 }
 
-const connect = async () => { 
+const connect = async () => {
+  socket.disconnect();
   await getPlayerInfo();
   await getGameStats();
+  socket.connect();
 }
 
 </script>
@@ -46,6 +49,8 @@ const connect = async () => {
           <div class="stat-data">{{ item.playerOneCount }}</div>
           <div class="stat-data">{{ item.playerTwoCount }}</div>          
         </div>
+
+        <div v-if="socketState.winner" class="header" style="color: red; font-weight: bold;">Winner: {{ socketState.winner }}</div>
 
       </div>
     </div>

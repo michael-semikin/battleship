@@ -5,7 +5,8 @@ const URL = 'http://localhost:8000';
 
 export const socketState = reactive({
   connected: false,
-  logs: []
+  logs: [],
+  winner: ''
 });
 
 export const socket = io(URL, {
@@ -14,6 +15,8 @@ export const socket = io(URL, {
 
 socket.on('connect', () => {
   socketState.connected = true;
+  socketState.logs = [];
+  socketState.winner = '';
 });
 
 socket.on('disconnect', () => {
@@ -22,5 +25,9 @@ socket.on('disconnect', () => {
 
 socket.on('log_sent', (data) => {
   socketState.logs = data;
+});
+
+socket.on('game_over', (data) => {
+  socketState.winner = data;
 });
 

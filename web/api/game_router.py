@@ -57,6 +57,9 @@ async def make_turn(request: Request, point: PointDto):
 
     await socket_server.emit("log_sent", [f"{i}\n" for i in game.get_log()])
 
+    print("\033c", end="")
+    print(game.player_two.board.matrix)
+
 @game_router.get("/update_board")
 async def update_board(request: Request):
     session = request.state.session.get_session()
@@ -69,11 +72,6 @@ async def update_board(request: Request):
     player_info = PlayerInfo(name = game.player_one.name, 
                              board = tuple(game.player_one.board.matrix), 
                              trackingBoard = tuple(game.player_one.tracking_board.matrix))
-    
-    if game.has_winner():
-        print("game finished")
-        del session[GAME_SESSION_KEY]
-        del session[INPUT_SESSION_KEY]
 
     return player_info
 
@@ -89,3 +87,18 @@ async def get_stats(request: Request):
     stats = game.calculate_stats()
 
     return [GameStat(shipType=ship.description, playerOneCount=count[0], playerTwoCount=count[1]) for ship, count in zip(ShipType, stats)]
+
+@game_router.post("/set_game_over")
+async def set_game_over(request: Request):
+    session = request.state.session.get_session()
+    game: WebGameEngine = session.get(GAME_SESSION_KEY)
+
+    if not game:
+        print("no game objects are in session")
+        return  
+
+    if game.has_winner():
+        print("game over 'cause there's a winner")
+        await socket_server.emit("game_over", game.turn_controller.who_made_turn.name)
+        del session[GAME_SESSION_KEY]
+        del session[INPUT_SESSION_KEY]
