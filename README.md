@@ -33,7 +33,11 @@ Supplementary support:
 # 🚢 About Game
 Battleship is a classic two-player guessing game where players try to sink each other's fleet of ships. It's like a naval combat played on grid boards!
 
+## Console UI
 ![Battleship game view](docs/assets/battleship.png)
+
+## Web Vue UI (v1)
+![Battleship game view](docs/assets/battleship_web.png)
 
 # 🚀 Features
 * 🤖 Smart AI Opponent – Uses hunt-and-target logic (no cheap cheats).
