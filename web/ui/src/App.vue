@@ -3,17 +3,20 @@
 import GameBoard from './components/GameBoard.vue';
 import type { IPoint } from './logic/models';
 import { useGameStart, useGameStats, useMakeTurn } from './logic/services/apiService';
+import { socketState } from './logic/services/socketService';
 
 const {playerName, boardData, trackingData, getPlayerInfo} = useGameStart();
 const { makeTurn } = useMakeTurn();
 const { stats, getGameStats } = useGameStats();
+
+
 
 const boardClikced = async (point: IPoint) => {
   await makeTurn(point);
   await getGameStats();
 }
 
-const connect = async () => {
+const connect = async () => { 
   await getPlayerInfo();
   await getGameStats();
 }
@@ -21,7 +24,7 @@ const connect = async () => {
 </script>
 
 <template>
-  <h1>Battleship game</h1>
+  <h1>Battleship game: {{ socketState.connected ? 'Connected' : 'Disconnected' }}</h1>
 
   <div class="main-layout">
 
@@ -51,7 +54,7 @@ const connect = async () => {
       <button class="player-button" @click="connect()">Start</button>
     </div>
 
-    <div class="log-area"> <textarea style="min-width: 320px;"></textarea></div>
+    <div class="log-area"> <textarea style="min-width: 700px; min-height: 250px;" v-model="socketState.logs"></textarea></div>
 
   </div>
 </template>

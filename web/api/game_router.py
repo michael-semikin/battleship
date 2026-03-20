@@ -7,6 +7,8 @@ from src.view.input_providers.hunter_input_provider import HunterInputProvider
 from src.view.input_providers.web_input_provider import WebInputProvider
 from src.view.models.transfer_objects import GameStat, PlayerInfo, Point as PointDto
 
+from socket_api import socket_server
+
 
 """The primary objective of this module is to illustrate web backend connectivity while also featuring the Vue web interface.
 """
@@ -50,9 +52,10 @@ async def make_turn(request: Request, point: PointDto):
     
     user_input = Point(point.row, point.column)
     input.get_external_input(Turn(None, point=user_input))
-    game.play()
-        
 
+    game.play()   
+
+    await socket_server.emit("log_sent", [f"{i}\n" for i in game.get_log()])
 
 @game_router.get("/update_board")
 async def update_board(request: Request):
@@ -67,6 +70,11 @@ async def update_board(request: Request):
                              board = tuple(game.player_one.board.matrix), 
                              trackingBoard = tuple(game.player_one.tracking_board.matrix))
     
+    if game.has_winner():
+        print("game finished")
+        del session[GAME_SESSION_KEY]
+        del session[INPUT_SESSION_KEY]
+
     return player_info
 
 @game_router.get("/get_stats")

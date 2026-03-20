@@ -1,5 +1,3 @@
-from collections.abc import Iterable
-
 from src.exceptions import AlreadyHitError, InputError
 from src.logic.game_engine import GameEngine
 from src.models.turn import Action
@@ -11,10 +9,6 @@ class DesktopGameEngine(GameEngine):
     def __init__(self, view_provider: ViewProvider) -> None:
         super().__init__()
         self._view_provider = view_provider
- 
-    def _get_log(self)-> Iterable[str]:
-        return tuple(f"{entry.date}: {entry.message} : {'shot at' if entry.turn else ' '} {entry.turn.point if entry.turn else ''}" 
-                     for entry in self._logger.get_logs())
     
     def display_stats(self):
         self._view_provider.render_stats(self.calculate_stats())     
@@ -24,12 +18,7 @@ class DesktopGameEngine(GameEngine):
             self._view_provider.render(self._player_one)
 
             self.display_stats()
-            self._view_provider.render_log(self._get_log())
-    
-    def _has_winner(self) -> bool:
-        player_one_defeated = self._player_one.board.no_ships_remaining
-        player_two_defeated = self._player_two.board.no_ships_remaining
-        return player_one_defeated or player_two_defeated
+            self._view_provider.render_log(self.get_log())
 
     def play(self):
         """ main loop
@@ -69,7 +58,7 @@ class DesktopGameEngine(GameEngine):
             turn_count += 1                
 
             # win/defeat condition
-            if self._has_winner():
+            if self.has_winner():
                 self._player_one.update_tracking_board(self._player_two.board)
                 # it is guaranteed that who_made_turn() will return a player, because the game can only end after a turn is made
                 self._logger.log(f"Game won by {self._turn_controller.who_made_turn.name}")

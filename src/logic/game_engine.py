@@ -1,5 +1,6 @@
 from collections import Counter
 import random
+from typing import Iterable
 
 from src.logic.logger import GameLogger
 from src.logic.turn_controller import TurnController
@@ -33,6 +34,10 @@ class GameEngine:
     def turn_controller(self) -> TurnController:
         return self._turn_controller
     
+    def get_log(self)-> Iterable[str]:
+        return tuple(f"{entry.date}: {entry.message} : {'shot at' if entry.turn else ' '} {entry.turn.point if entry.turn else ''}" 
+                     for entry in self._logger.get_logs())
+
     def _get_ships_count(self, player: Player) -> Counter:
         return Counter((ship.type, ship.is_alive) for ship in player.board.ships)
         
@@ -43,6 +48,11 @@ class GameEngine:
                 (player_one_ships[ship_type, True], player_two_ships[ship_type, False]) for ship_type in ShipType
                 )
         return ships_count
+    
+    def has_winner(self) -> bool:
+        player_one_defeated = self._player_one.board.no_ships_remaining
+        player_two_defeated = self._player_two.board.no_ships_remaining
+        return player_one_defeated or player_two_defeated    
 
     def init_game(self, input_provider_one: InputProvider | None, input_provider_two: InputProvider | None):
         """ initializes the game by creating two players and filling their boards with ships

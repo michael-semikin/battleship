@@ -3,18 +3,24 @@ import { reactive } from "vue";
 
 const URL = 'http://localhost:8000';
 
-export const state = reactive({
+export const socketState = reactive({
   connected: false,
-  fooEvents: [],
-  barEvents: []
+  logs: []
 });
 
-export const socket = io(URL);
-
-socket.on("connect", () => {
-  state.connected = true;
+export const socket = io(URL, {
+  transports: ["websocket"] 
 });
 
-socket.on("disconnect", () => {
-  state.connected = false;
+socket.on('connect', () => {
+  socketState.connected = true;
 });
+
+socket.on('disconnect', () => {
+  socketState.connected = false;
+});
+
+socket.on('log_sent', (data) => {
+  socketState.logs = data;
+});
+
